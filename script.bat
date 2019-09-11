@@ -63,6 +63,26 @@ IF /I "%1"=="-git" (
     ) 
     EXIT /B %ERRORLEVEL%
 )
+IF /I "%1"=="-ter" (
+    ECHO.
+    CALL:ECHOBLUE "Se instalaran los siguientes programas: "
+    ECHO.
+    CALL:ECHOYELLOW "Chocolatey."
+    CALL:ECHOYELLOW "Terminus."
+    CALL:INSTALL_CHOCO
+    CALL:INSTALL_TERMINUS
+    EXIT /B %ERRORLEVEL%
+)
+IF /I "%1"=="--install-terminus" (
+    ECHO.
+    CALL:ECHOBLUE "Se instalaran los siguientes programas: "
+    ECHO.
+    CALL:ECHOYELLOW "Chocolatey."
+    CALL:ECHOYELLOW "Terminus."
+    CALL:INSTALL_CHOCO
+    CALL:INSTALL_TERMINUS
+    EXIT /B %ERRORLEVEL%
+)
 IF /I "%1"=="--install-git" (
     ECHO.
     CALL:ECHOBLUE "Se instalaran los siguientes programas: "
@@ -123,6 +143,9 @@ IF /I "%1"=="--configuration-1" (
     ECHO -vs, --install-code
     ECHO    Instala Visual Studio Code.
     ECHO.
+    ECHO -ter, --install-terminus
+    ECHO    Instala terminus.
+    ECHO.
     ECHO -git, --install-git
     ECHO    Instala git.
     ECHO.
@@ -132,7 +155,9 @@ IF /I "%1"=="--configuration-1" (
     ECHO --unset-proxy 
     ECHO    Quita el proxy de git.
     ECHO.
-    CALL:ECHOBLUE "'-c1, --configuration-1'"
+    CALL:ECHOBLUE "CONFIGURACIONES:"
+    ECHO.
+    ECHO -c1, --configuration-1
     ECHO.
     ECHO Instala los siguientes programas:
     ECHO.
@@ -140,11 +165,10 @@ IF /I "%1"=="--configuration-1" (
     CALL:ECHOMAGENTA "Visual Studio Code."
     CALL:ECHOMAGENTA "Git."
     ECHO.
-    ECHO Con las siguientes configuraciones:
+    CALL:ECHOYELLOW "Con la siguiente configuracion:"
     ECHO.
-    CALL:ECHOYELLOW "Proxy de git:"
-    ECHO    Ip: 192.168.3.5
-    ECHO    Puerto: 8080
+    ECHO Ip: 192.168.3.5
+    ECHO Puerto: 8080
 EXIT /B 0
 :INSTALL_CHOCO
     IF EXIST "C:\ProgramData\chocolatey" (
@@ -156,7 +180,11 @@ EXIT /B 0
         ECHO.
         @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))" && SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
         ECHO.
-        CALL:ECHOGREEN "Chocolatey se ha instalado satisfactoriamente."
+        IF %ERRORLEVEL% NEQ 0 (
+            CALL:ECHORED "Error al instalar chocolatey."
+        ) ELSE (
+            CALL:ECHOGREEN "Chocolatey se ha instalado satisfactoriamente."
+        )
     )
 EXIT /B 0
 :INSTALL_CODE
@@ -169,7 +197,28 @@ EXIT /B 0
         ECHO.
         choco install vscode -y
         ECHO.
-        CALL:ECHOGREEN "Visual Studio Code se ha instalado satisfactoriamente."
+        IF %ERRORLEVEL% NEQ 0 (
+            CALL:ECHORED "Error al instalar Visual Studio Code."
+        ) ELSE (
+            CALL:ECHOGREEN "Visual Studio Code se ha instalado satisfactoriamente."
+        )
+    )
+EXIT /B 0
+:INSTALL_TERMINUS
+    IF EXIST "%LOCALAPPDATA%\Programs\Terminus" (
+        ECHO.
+        CALL:ECHOMAGENTA "Terminus ya se encuentra instalado."
+    ) ELSE (
+        ECHO.
+        CALL:ECHOGREEN "Instalando Terminus."
+        ECHO.
+        choco install terminus -y
+        ECHO.
+        IF %ERRORLEVEL% NEQ 0 (
+            CALL:ECHORED "Error al instalar Terminus."
+        ) ELSE (
+            CALL:ECHOGREEN "Terminus se ha instalado satisfactoriamente."
+        )
     )
 EXIT /B 0
 :INSTALL_GIT
@@ -182,7 +231,11 @@ EXIT /B 0
         ECHO.
         choco install git -y
         ECHO.
-        CALL:ECHOGREEN "Git se ha instalado satisfactoriamente."
+        IF %ERRORLEVEL% NEQ 0 (
+            CALL:ECHORED "Error al instalar Git."
+        ) ELSE (
+            CALL:ECHOGREEN "Git se ha instalado satisfactoriamente."
+        )
     )
 EXIT /B 0
 :PROXY_GIT:
@@ -193,12 +246,24 @@ EXIT /B 0
     ECHO Puerto: 8080
     ECHO.
     git config --global http.proxy 192.168.3.5:8080
-    CALL:ECHOGREEN "El proxy se ha configurado satisfactoriamente"
+    IF %ERRORLEVEL% NEQ 0 (
+        CALL:ECHORED "Error al configurar el proxy de Git."
+        ECHO.
+        CALL:ECHOYELLOW "RECOMENDACION: Cierra el terminal y ejecuta el comando de nuevo"
+    ) ELSE (
+        CALL:ECHOGREEN "El proxy se ha configurado satisfactoriamente"
+    )
 EXIT /B 0
 :UNSET_GIT:
     ECHO.
     git config --global --unset http.proxy
-    CALL:ECHOBLUE "Proxy retirado"
+    IF %ERRORLEVEL% NEQ 0 (
+        CALL:ECHORED "Error al retirar el proxy de Git."
+        ECHO.
+        CALL:ECHOYELLOW "RECOMENDACION: Cierra el terminal y ejecuta el comando de nuevo"
+    ) ELSE (
+        CALL:ECHOGREEN "Proxy retirado""
+    )
 EXIT /B 0
 :ECHORED
     %Windir%\System32\WindowsPowerShell\v1.0\Powershell.exe write-host -foregroundcolor Red %1
