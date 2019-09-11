@@ -61,6 +61,25 @@ IF /I "%1"=="-git" (
     IF /I "%2"=="--configure-proxy" (
         CALL:PROXY_GIT
     ) 
+    IF /I "%2"=="--set-credentials" (
+        CALL:GIT_CREDENTIALS
+    ) 
+    EXIT /B %ERRORLEVEL%
+)
+IF /I "%1"=="--install-git" (
+    ECHO.
+    CALL:ECHOBLUE "Se instalaran los siguientes programas: "
+    ECHO.
+    CALL:ECHOYELLOW "Chocolatey."
+    CALL:ECHOYELLOW "Git."
+    CALL:INSTALL_CHOCO
+    CALL:INSTALL_GIT
+    IF /I "%2"=="--configure-proxy" (
+        CALL:PROXY_GIT
+    )
+    IF /I "%2"=="--set-credentials" (
+        CALL:GIT_CREDENTIALS
+    ) 
     EXIT /B %ERRORLEVEL%
 )
 IF /I "%1"=="-ter" (
@@ -81,19 +100,6 @@ IF /I "%1"=="--install-terminus" (
     CALL:ECHOYELLOW "Terminus."
     CALL:INSTALL_CHOCO
     CALL:INSTALL_TERMINUS
-    EXIT /B %ERRORLEVEL%
-)
-IF /I "%1"=="--install-git" (
-    ECHO.
-    CALL:ECHOBLUE "Se instalaran los siguientes programas: "
-    ECHO.
-    CALL:ECHOYELLOW "Chocolatey."
-    CALL:ECHOYELLOW "Git."
-    CALL:INSTALL_CHOCO
-    CALL:INSTALL_GIT
-    IF /I "%2"=="--configure-proxy" (
-        CALL:PROXY_GIT
-    ) 
     EXIT /B %ERRORLEVEL%
 )
 IF /I "%1"=="--unset-proxy" (
@@ -117,6 +123,7 @@ IF /I "%1"=="-c1" (
     CALL:INSTALL_CODE
     CALL:INSTALL_GIT
     CALL:PROXY_GIT
+    CALL:GIT_CREDENTIALS
     EXIT /B %ERRORLEVEL%
 )
 IF /I "%1"=="--configuration-1" (
@@ -130,6 +137,7 @@ IF /I "%1"=="--configuration-1" (
     CALL:INSTALL_CODE
     CALL:INSTALL_GIT
     CALL:PROXY_GIT
+    CALL:GIT_CREDENTIALS
     EXIT /B %ERRORLEVEL%
 )
 :HELP_MESSAGE
@@ -152,6 +160,12 @@ IF /I "%1"=="--configuration-1" (
     ECHO    --configure-proxy 
     ECHO    Configura git con el proxy de la uptc.
     ECHO.
+    ECHO    --set-credentials
+    ECHO    Configura las credenciales de git con la siguiente informacion:
+    ECHO.
+    ECHO    git.user.name: 'Cristian Fonseca'
+    ECHO    git.user.email: 'cristian.lfs@gmail.com'
+    ECHO.
     ECHO --unset-proxy 
     ECHO    Quita el proxy de git.
     ECHO.
@@ -167,8 +181,11 @@ IF /I "%1"=="--configuration-1" (
     ECHO.
     CALL:ECHOYELLOW "Con la siguiente configuracion:"
     ECHO.
-    ECHO Ip: 192.168.3.5
-    ECHO Puerto: 8080
+    ECHO git.ip: 192.168.3.5
+    ECHO git.puerto: 8080
+    ECHO git.user.name: 'Cristian Fonseca'
+    ECHO git.user.email: 'cristian.lfs@gmail.com'
+    ECHO.
 EXIT /B 0
 :INSTALL_CHOCO
     IF EXIST "C:\ProgramData\chocolatey" (
@@ -242,8 +259,8 @@ EXIT /B 0
     ECHO.
     CALL:ECHOBLUE "Se configurara el proxy de git con la siguiente configuracion: "
     ECHO.
-    ECHO Ip: 192.168.3.5
-    ECHO Puerto: 8080
+    ECHO git.ip: 192.168.3.5
+    ECHO git.puerto: 8080
     ECHO.
     git config --global http.proxy 192.168.3.5:8080
     IF %ERRORLEVEL% NEQ 0 (
@@ -252,6 +269,24 @@ EXIT /B 0
         CALL:ECHOYELLOW "RECOMENDACION: Cierra el terminal y ejecuta el comando de nuevo"
     ) ELSE (
         CALL:ECHOGREEN "El proxy se ha configurado satisfactoriamente"
+    )
+EXIT /B 0
+:GIT_CREDENTIALS:
+    ECHO.
+    CALL:ECHOBLUE "Se configurara las credenciales de git con la siguiente configuracion: "
+    ECHO.
+    ECHO git.user.name: 'Cristian Fonseca'
+    ECHO git.user.email: 'cristian.lfs@gmail.com'
+    ECHO.
+    git config --global user.name "Cristian Fonseca"
+    IF %ERRORLEVEL% NEQ 0 (
+        CALL:ECHORED "Error al configurar las credenciales de Git."
+        ECHO.
+        CALL:ECHOYELLOW "RECOMENDACION: Cierra el terminal y ejecuta el comando de nuevo"
+        EXIT /B 0
+    ) ELSE (
+        git config --global user.email "cristian.lfs@gmail.com"
+        CALL:ECHOGREEN "Las credenciales de git se han configurado satisfactoriamente"
     )
 EXIT /B 0
 :UNSET_GIT:
