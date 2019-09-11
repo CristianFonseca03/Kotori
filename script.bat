@@ -1,5 +1,27 @@
 @echo off
-CALL admin.bat
+
+:: Pedir permisos de administrador
+    REM  --> Check for permissions
+    IF "%PROCESSOR_ARCHITECTURE%" EQU "amd64" (
+        >nul 2>&1 "%SYSTEMROOT%\SysWOW64\cacls.exe" "%SYSTEMROOT%\SysWOW64\config\system"
+    ) ELSE (
+        >nul 2>&1 "%SYSTEMROOT%\system32\cacls.exe" "%SYSTEMROOT%\system32\config\system"
+    )
+    REM --> If error flag set, we do not have admin.
+    if '%errorlevel%' NEQ '0' (
+        echo Requesting administrative privileges...
+        goto UACPrompt
+    ) else ( goto gotAdmin )
+    :UACPrompt
+        echo Set UAC = CreateObject^("Shell.Application"^) > "%temp%\getadmin.vbs"
+        set params= %*
+        echo UAC.ShellExecute "cmd.exe", "/c ""%~s0"" %params:"=""%", "", "runas", 1 >> "%temp%\getadmin.vbs"
+        "%temp%\getadmin.vbs"
+        del "%temp%\getadmin.vbs"
+        exit /B
+    :gotAdmin
+        pushd "%CD%"
+        CD /D "%~dp0"
 SETLOCAL
 IF /I "%1"=="" (
     CALL:HELP_MESSAGE
@@ -8,10 +30,12 @@ IF /I "%1"=="" (
 )
 IF /I "%1"=="-?" (
     CALL:HELP_MESSAGE
+    PAUSE
     EXIT /B %ERRORLEVEL%
 )
 IF /I "%1"=="--help" (
     CALL:HELP_MESSAGE
+    PAUSE
     EXIT /B %ERRORLEVEL%
 )
 IF /I "%1"=="-ch" (
@@ -20,6 +44,7 @@ IF /I "%1"=="-ch" (
     ECHO.
     CALL:ECHOYELLOW "Chocolatey."
     CALL:INSTALL_CHOCO
+    PAUSE
     EXIT /B %ERRORLEVEL%
 )
 IF /I "%1"=="--install-chocolatey" (
@@ -28,6 +53,7 @@ IF /I "%1"=="--install-chocolatey" (
     ECHO.
     CALL:ECHOYELLOW "Chocolatey."
     CALL:INSTALL_CHOCO
+    PAUSE
     EXIT /B %ERRORLEVEL%
 )
 IF /I "%1"=="-vs" (
@@ -38,6 +64,7 @@ IF /I "%1"=="-vs" (
     CALL:ECHOYELLOW "Visual Studio Code."
     CALL:INSTALL_CHOCO
     CALL:INSTALL_CODE
+    PAUSE
     EXIT /B %ERRORLEVEL%
 )
 IF /I "%1"=="--install-code" (
@@ -48,6 +75,7 @@ IF /I "%1"=="--install-code" (
     CALL:ECHOYELLOW "Visual Studio Code."
     CALL:INSTALL_CHOCO
     CALL:INSTALL_CODE
+    PAUSE
     EXIT /B %ERRORLEVEL%
 )
 IF /I "%1"=="-git" (
@@ -64,6 +92,7 @@ IF /I "%1"=="-git" (
     IF /I "%2"=="--set-credentials" (
         CALL:GIT_CREDENTIALS
     ) 
+    PAUSE
     EXIT /B %ERRORLEVEL%
 )
 IF /I "%1"=="--install-git" (
@@ -80,6 +109,7 @@ IF /I "%1"=="--install-git" (
     IF /I "%2"=="--set-credentials" (
         CALL:GIT_CREDENTIALS
     ) 
+    PAUSE
     EXIT /B %ERRORLEVEL%
 )
 IF /I "%1"=="-ter" (
@@ -90,6 +120,7 @@ IF /I "%1"=="-ter" (
     CALL:ECHOYELLOW "Terminus."
     CALL:INSTALL_CHOCO
     CALL:INSTALL_TERMINUS
+    PAUSE
     EXIT /B %ERRORLEVEL%
 )
 IF /I "%1"=="--install-terminus" (
@@ -100,16 +131,18 @@ IF /I "%1"=="--install-terminus" (
     CALL:ECHOYELLOW "Terminus."
     CALL:INSTALL_CHOCO
     CALL:INSTALL_TERMINUS
+    PAUSE
     EXIT /B %ERRORLEVEL%
 )
 IF /I "%1"=="--unset-proxy" (
     IF EXIST "C:\Program Files\Git\cmd" (
-        CALL:UNSET_GIT
+        CALL:UNSET_GIT_PROXY
     ) ELSE (
         ECHO.
         CALL:ECHORED "Git no esta instalado en el equipo"
         EXIT /B 0
     )
+    PAUSE
     EXIT /B %ERRORLEVEL%
 )
 IF /I "%1"=="-c1" (
@@ -124,6 +157,7 @@ IF /I "%1"=="-c1" (
     CALL:INSTALL_GIT
     CALL:PROXY_GIT
     CALL:GIT_CREDENTIALS
+    PAUSE
     EXIT /B %ERRORLEVEL%
 )
 IF /I "%1"=="--configuration-1" (
@@ -138,6 +172,7 @@ IF /I "%1"=="--configuration-1" (
     CALL:INSTALL_GIT
     CALL:PROXY_GIT
     CALL:GIT_CREDENTIALS
+    PAUSE
     EXIT /B %ERRORLEVEL%
 )
 :HELP_MESSAGE
@@ -158,7 +193,9 @@ IF /I "%1"=="--configuration-1" (
     ECHO    Instala git.
     ECHO.
     ECHO    --configure-proxy 
-    ECHO    Configura git con el proxy de la uptc.
+    ECHO    Configura el proxy de git con la siguiente informacion.
+    ECHO.
+    ECHO    git.proxy: 192.168.3.5:8080
     ECHO.
     ECHO    --set-credentials
     ECHO    Configura las credenciales de git con la siguiente informacion:
@@ -181,8 +218,7 @@ IF /I "%1"=="--configuration-1" (
     ECHO.
     CALL:ECHOYELLOW "Con la siguiente configuracion:"
     ECHO.
-    ECHO git.ip: 192.168.3.5
-    ECHO git.puerto: 8080
+    ECHO git.proxy: 192.168.3.5:8080
     ECHO git.user.name: 'Cristian Fonseca'
     ECHO git.user.email: 'cristian.lfs@gmail.com'
     ECHO.
@@ -259,8 +295,7 @@ EXIT /B 0
     ECHO.
     CALL:ECHOBLUE "Se configurara el proxy de git con la siguiente configuracion: "
     ECHO.
-    ECHO git.ip: 192.168.3.5
-    ECHO git.puerto: 8080
+    ECHO git.proxy: 192.168.3.5:8080
     ECHO.
     git config --global http.proxy 192.168.3.5:8080
     IF %ERRORLEVEL% NEQ 0 (
@@ -289,7 +324,7 @@ EXIT /B 0
         CALL:ECHOGREEN "Las credenciales de git se han configurado satisfactoriamente"
     )
 EXIT /B 0
-:UNSET_GIT:
+:UNSET_GIT_PROXY:
     ECHO.
     git config --global --unset http.proxy
     IF %ERRORLEVEL% NEQ 0 (
