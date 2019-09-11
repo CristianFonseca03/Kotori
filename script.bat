@@ -22,6 +22,7 @@
     :gotAdmin
         pushd "%CD%"
         CD /D "%~dp0"
+        
 SETLOCAL
 IF /I "%1"=="" (
     CALL:HELP_MESSAGE
@@ -64,6 +65,11 @@ IF /I "%1"=="-vs" (
     CALL:ECHOYELLOW "Visual Studio Code."
     CALL:INSTALL_CHOCO
     CALL:INSTALL_CODE
+    IF /I "%2"=="-beautify" (
+        ECHO.
+        ECHO Se instalaran las siguientes extensiones:
+        CALL:INSTALL_BEAUTIFY
+    ) 
     PAUSE
     EXIT /B %ERRORLEVEL%
 )
@@ -75,6 +81,11 @@ IF /I "%1"=="--install-code" (
     CALL:ECHOYELLOW "Visual Studio Code."
     CALL:INSTALL_CHOCO
     CALL:INSTALL_CODE
+    IF /I "%2"=="-beautify" (
+        ECHO.
+        ECHO Se instalaran las siguientes extensiones:
+        CALL:INSTALL_BEAUTIFY
+    )
     PAUSE
     EXIT /B %ERRORLEVEL%
 )
@@ -186,6 +197,9 @@ IF /I "%1"=="--configuration-1" (
     ECHO -vs, --install-code
     ECHO    Instala Visual Studio Code.
     ECHO.
+    ECHO    -beautify
+    ECHO    Instala Visual Studio Code con la extension 'Beautify'.
+    ECHO.
     ECHO -ter, --install-terminus
     ECHO    Instala terminus.
     ECHO.
@@ -291,7 +305,7 @@ EXIT /B 0
         )
     )
 EXIT /B 0
-:PROXY_GIT:
+:PROXY_GIT
     ECHO.
     CALL:ECHOBLUE "Se configurara el proxy de git con la siguiente configuracion: "
     ECHO.
@@ -306,7 +320,7 @@ EXIT /B 0
         CALL:ECHOGREEN "El proxy se ha configurado satisfactoriamente"
     )
 EXIT /B 0
-:GIT_CREDENTIALS:
+:GIT_CREDENTIALS
     ECHO.
     CALL:ECHOBLUE "Se configurara las credenciales de git con la siguiente configuracion: "
     ECHO.
@@ -324,7 +338,7 @@ EXIT /B 0
         CALL:ECHOGREEN "Las credenciales de git se han configurado satisfactoriamente"
     )
 EXIT /B 0
-:UNSET_GIT_PROXY:
+:UNSET_GIT_PROXY
     ECHO.
     git config --global --unset http.proxy
     IF %ERRORLEVEL% NEQ 0 (
@@ -335,6 +349,12 @@ EXIT /B 0
         CALL:ECHOGREEN "Proxy retirado""
     )
 EXIT /B 0
+:INSTALL_BEAUTIFY
+    ECHO.
+    CALL:ECHOYELLOW "Beautify"
+    ECHO.
+    CALL code --install-extension vs-extensions/HookyQR.beautify-1.5.0.vsix
+EXIT /B 0   
 :ECHORED
     %Windir%\System32\WindowsPowerShell\v1.0\Powershell.exe write-host -foregroundcolor Red %1
 GOTO:EOF
