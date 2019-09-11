@@ -86,6 +86,32 @@ IF /I "%1"=="--unset-proxy" (
     )
     EXIT /B %ERRORLEVEL%
 )
+IF /I "%1"=="-c1" (
+    ECHO.
+    CALL:ECHOBLUE "Se instalaran los siguientes programas: "
+    ECHO.
+    CALL:ECHOYELLOW "Chocolatey."
+    CALL:ECHOYELLOW "Visual Studio Code."
+    CALL:ECHOYELLOW "Git."
+    CALL:INSTALL_CHOCO
+    CALL:INSTALL_CODE
+    CALL:INSTALL_GIT
+    CALL:PROXY_GIT
+    EXIT /B %ERRORLEVEL%
+)
+IF /I "%1"=="--configuration-1" (
+    ECHO.
+    CALL:ECHOBLUE "Se instalaran los siguientes programas: "
+    ECHO.
+    CALL:ECHOYELLOW "Chocolatey."
+    CALL:ECHOYELLOW "Visual Studio Code."
+    CALL:ECHOYELLOW "Git."
+    CALL:INSTALL_CHOCO
+    CALL:INSTALL_CODE
+    CALL:INSTALL_GIT
+    CALL:PROXY_GIT
+    EXIT /B %ERRORLEVEL%
+)
 :HELP_MESSAGE
     ECHO.
     ECHO -?, --help
@@ -105,6 +131,20 @@ IF /I "%1"=="--unset-proxy" (
     ECHO.
     ECHO --unset-proxy 
     ECHO    Quita el proxy de git.
+    ECHO.
+    CALL:ECHOBLUE "'-c1, --configuration-1'"
+    ECHO.
+    ECHO Instala los siguientes programas:
+    ECHO.
+    CALL:ECHOMAGENTA "Chocolatey."
+    CALL:ECHOMAGENTA "Visual Studio Code."
+    CALL:ECHOMAGENTA "Git."
+    ECHO.
+    ECHO Con las siguientes configuraciones:
+    ECHO.
+    CALL:ECHOYELLOW "Proxy de git:"
+    ECHO    Ip: 192.168.3.5
+    ECHO    Puerto: 8080
 EXIT /B 0
 :INSTALL_CHOCO
     IF EXIST "C:\ProgramData\chocolatey" (
