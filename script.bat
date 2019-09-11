@@ -35,7 +35,7 @@ IF /I "%1"=="-vs" (
     CALL:ECHOBLUE "Se instalaran los siguientes programas: "
     ECHO.
     CALL:ECHOYELLOW "Chocolatey."
-    CALL:ECHOYELLOW "Visual studio code."
+    CALL:ECHOYELLOW "Visual Studio Code."
     CALL:INSTALL_CHOCO
     CALL:INSTALL_CODE
     EXIT /B %ERRORLEVEL%
@@ -45,7 +45,7 @@ IF /I "%1"=="--install-code" (
     CALL:ECHOBLUE "Se instalaran los siguientes programas: "
     ECHO.
     CALL:ECHOYELLOW "Chocolatey."
-    CALL:ECHOYELLOW "Visual studio code."
+    CALL:ECHOYELLOW "Visual Studio Code."
     CALL:INSTALL_CHOCO
     CALL:INSTALL_CODE
     EXIT /B %ERRORLEVEL%
@@ -121,7 +121,7 @@ IF /I "%1"=="--configuration-1" (
     ECHO    Instala chocolatey.
     ECHO.
     ECHO -vs, --install-code
-    ECHO    Instala visual studio code.
+    ECHO    Instala Visual Studio Code.
     ECHO.
     ECHO -git, --install-git
     ECHO    Instala git.
@@ -162,14 +162,14 @@ EXIT /B 0
 :INSTALL_CODE
     IF EXIST "C:\Program Files\Microsoft VS Code" (
         ECHO.
-        CALL:ECHOMAGENTA "Visual studio code ya se encuentra instalado."
+        CALL:ECHOMAGENTA "Visual Studio Code ya se encuentra instalado."
     ) ELSE (
         ECHO.
-        CALL:ECHOGREEN "Instalando visual studio code."
+        CALL:ECHOGREEN "Instalando Visual Studio Code."
         ECHO.
         choco install vscode -y
         ECHO.
-        CALL:ECHOGREEN "Visual studio code se ha instalado satisfactoriamente."
+        CALL:ECHOGREEN "Visual Studio Code se ha instalado satisfactoriamente."
     )
 EXIT /B 0
 :INSTALL_GIT
