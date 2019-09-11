@@ -1,191 +1,151 @@
-@echo off
-
-:: Pedir permisos de administrador
-    REM  --> Check for permissions
-    IF "%PROCESSOR_ARCHITECTURE%" EQU "amd64" (
-        >nul 2>&1 "%SYSTEMROOT%\SysWOW64\cacls.exe" "%SYSTEMROOT%\SysWOW64\config\system"
-    ) ELSE (
-        >nul 2>&1 "%SYSTEMROOT%\system32\cacls.exe" "%SYSTEMROOT%\system32\config\system"
-    )
-    REM --> If error flag set, we do not have admin.
-    if '%errorlevel%' NEQ '0' (
-        echo Requesting administrative privileges...
-        goto UACPrompt
-    ) else ( goto gotAdmin )
-    :UACPrompt
-        echo Set UAC = CreateObject^("Shell.Application"^) > "%temp%\getadmin.vbs"
-        set params= %*
-        echo UAC.ShellExecute "cmd.exe", "/c ""%~s0"" %params:"=""%", "", "runas", 1 >> "%temp%\getadmin.vbs"
-        "%temp%\getadmin.vbs"
-        del "%temp%\getadmin.vbs"
-        exit /B
-    :gotAdmin
-        pushd "%CD%"
-        CD /D "%~dp0"
-        
+@ECHO OFF  
 SETLOCAL
-IF /I "%1"=="" (
-    CALL:HELP_MESSAGE
+NET SESSION >nul 2>&1
+IF %ERRORLEVEL% == 0 (
+    CALL:COMANDS %1 %2
     PAUSE
-    EXIT /B %ERRORLEVEL%
-)
-IF /I "%1"=="-?" (
-    CALL:HELP_MESSAGE
+) ELSE (
+    ECHO.
+    CALL:ECHOYELLOW "Este programa se debe ejecutar en un entorno elvado de administrador."
     PAUSE
-    EXIT /B %ERRORLEVEL%
 )
-IF /I "%1"=="--help" (
-    CALL:HELP_MESSAGE
-    PAUSE
-    EXIT /B %ERRORLEVEL%
-)
-IF /I "%1"=="-ch" (
-    ECHO.
-    CALL:ECHOBLUE "Se instalaran los siguientes programas: "
-    ECHO.
-    CALL:ECHOYELLOW "Chocolatey."
-    CALL:INSTALL_CHOCO
-    PAUSE
-    EXIT /B %ERRORLEVEL%
-)
-IF /I "%1"=="--install-chocolatey" (
-    ECHO.
-    CALL:ECHOBLUE "Se instalaran los siguientes programas: "
-    ECHO.
-    CALL:ECHOYELLOW "Chocolatey."
-    CALL:INSTALL_CHOCO
-    PAUSE
-    EXIT /B %ERRORLEVEL%
-)
-IF /I "%1"=="-vs" (
-    ECHO.
-    CALL:ECHOBLUE "Se instalaran los siguientes programas: "
-    ECHO.
-    CALL:ECHOYELLOW "Chocolatey."
-    CALL:ECHOYELLOW "Visual Studio Code."
-    CALL:INSTALL_CHOCO
-    CALL:INSTALL_CODE
-    IF /I "%2"=="-beautify" (
-        ECHO.
-        ECHO Se instalaran las siguientes extensiones:
-        CALL:INSTALL_BEAUTIFY
-    ) 
-    PAUSE
-    EXIT /B %ERRORLEVEL%
-)
-IF /I "%1"=="--install-code" (
-    ECHO.
-    CALL:ECHOBLUE "Se instalaran los siguientes programas: "
-    ECHO.
-    CALL:ECHOYELLOW "Chocolatey."
-    CALL:ECHOYELLOW "Visual Studio Code."
-    CALL:INSTALL_CHOCO
-    CALL:INSTALL_CODE
-    IF /I "%2"=="-beautify" (
-        ECHO.
-        ECHO Se instalaran las siguientes extensiones:
-        CALL:INSTALL_BEAUTIFY
+EXIT /B %ERRORLEVEL%
+:COMANDS
+    IF /I "%1"=="" (
+        CALL:HELP_MESSAGE
     )
-    PAUSE
-    EXIT /B %ERRORLEVEL%
-)
-IF /I "%1"=="-git" (
-    ECHO.
-    CALL:ECHOBLUE "Se instalaran los siguientes programas: "
-    ECHO.
-    CALL:ECHOYELLOW "Chocolatey."
-    CALL:ECHOYELLOW "Git."
-    CALL:INSTALL_CHOCO
-    CALL:INSTALL_GIT
-    IF /I "%2"=="--configure-proxy" (
+    IF /I "%1"=="-?" (
+        CALL:HELP_MESSAGE
+    )
+    IF /I "%1"=="--help" (
+        CALL:HELP_MESSAGE
+    )
+    IF /I "%1"=="-ch" (
+        ECHO.
+        CALL:ECHOBLUE "Se instalaran los siguientes programas: "
+        ECHO.
+        CALL:ECHOYELLOW "Chocolatey."
+        CALL:INSTALL_CHOCO
+    )
+    IF /I "%1"=="--install-chocolatey" (
+        ECHO.
+        CALL:ECHOBLUE "Se instalaran los siguientes programas: "
+        ECHO.
+        CALL:ECHOYELLOW "Chocolatey."
+        CALL:INSTALL_CHOCO
+    )
+    IF /I "%1"=="-vs" (
+        ECHO.
+        CALL:ECHOBLUE "Se instalaran los siguientes programas: "
+        ECHO.
+        CALL:ECHOYELLOW "Chocolatey."
+        CALL:ECHOYELLOW "Visual Studio Code."
+        CALL:INSTALL_CHOCO
+        CALL:INSTALL_CODE
+        IF /I "%2"=="-beautify" (
+            ECHO.
+            ECHO Se instalaran las siguientes extensiones:
+            CALL:INSTALL_BEAUTIFY
+        ) 
+    ) 
+    IF /I "%1"=="--install-code" (
+        ECHO.
+        CALL:ECHOBLUE "Se instalaran los siguientes programas: "
+        ECHO.
+        CALL:ECHOYELLOW "Chocolatey."
+        CALL:ECHOYELLOW "Visual Studio Code."
+        CALL:INSTALL_CHOCO
+        CALL:INSTALL_CODE
+        IF /I "%2"=="-beautify" (
+            ECHO.
+            ECHO Se instalaran las siguientes extensiones:
+            CALL:INSTALL_BEAUTIFY
+        )  
+    )
+    IF /I "%1"=="-git" (
+        ECHO.
+        CALL:ECHOBLUE "Se instalaran los siguientes programas: "
+        ECHO.
+        CALL:ECHOYELLOW "Chocolatey."
+        CALL:ECHOYELLOW "Git."
+        CALL:INSTALL_CHOCO
+        CALL:INSTALL_GIT
+        IF /I "%2"=="--configure-proxy" (
+            CALL:PROXY_GIT
+        )
+        IF /I "%2"=="--set-credentials" (
+            CALL:GIT_CREDENTIALS
+        )  
+    )
+    IF /I "%1"=="--install-git" (
+        ECHO.
+        CALL:ECHOBLUE "Se instalaran los siguientes programas: "
+        ECHO.
+        CALL:ECHOYELLOW "Chocolatey."
+        CALL:ECHOYELLOW "Git."
+        CALL:INSTALL_CHOCO
+        CALL:INSTALL_GIT
+        IF /I "%2"=="--configure-proxy" (
+            CALL:PROXY_GIT
+        )
+        IF /I "%2"=="--set-credentials" (
+            CALL:GIT_CREDENTIALS
+        ) 
+    )
+    IF /I "%1"=="-ter" (
+        ECHO.
+        CALL:ECHOBLUE "Se instalaran los siguientes programas: "
+        ECHO.
+        CALL:ECHOYELLOW "Chocolatey."
+        CALL:ECHOYELLOW "Terminus."
+        CALL:INSTALL_CHOCO
+        CALL:INSTALL_TERMINUS
+    )
+    IF /I "%1"=="--install-terminus" (
+        ECHO.
+        CALL:ECHOBLUE "Se instalaran los siguientes programas: "
+        ECHO.
+        CALL:ECHOYELLOW "Chocolatey."
+        CALL:ECHOYELLOW "Terminus."
+        CALL:INSTALL_CHOCO
+        CALL:INSTALL_TERMINUS 
+    )
+    IF /I "%1"=="--unset-proxy" (
+        IF EXIST "C:\Program Files\Git\cmd" (
+            CALL:UNSET_GIT_PROXY
+        ) ELSE (
+            ECHO.
+            CALL:ECHORED "Git no esta instalado en el equipo"
+            EXIT /B 0
+        ) 
+    )
+    IF /I "%1"=="-c1" (
+        ECHO.
+        CALL:ECHOBLUE "Se instalaran los siguientes programas: "
+        ECHO.
+        CALL:ECHOYELLOW "Chocolatey."
+        CALL:ECHOYELLOW "Visual Studio Code."
+        CALL:ECHOYELLOW "Git."
+        CALL:INSTALL_CHOCO
+        CALL:INSTALL_CODE
+        CALL:INSTALL_GIT
         CALL:PROXY_GIT
-    ) 
-    IF /I "%2"=="--set-credentials" (
         CALL:GIT_CREDENTIALS
-    ) 
-    PAUSE
-    EXIT /B %ERRORLEVEL%
-)
-IF /I "%1"=="--install-git" (
-    ECHO.
-    CALL:ECHOBLUE "Se instalaran los siguientes programas: "
-    ECHO.
-    CALL:ECHOYELLOW "Chocolatey."
-    CALL:ECHOYELLOW "Git."
-    CALL:INSTALL_CHOCO
-    CALL:INSTALL_GIT
-    IF /I "%2"=="--configure-proxy" (
-        CALL:PROXY_GIT
     )
-    IF /I "%2"=="--set-credentials" (
-        CALL:GIT_CREDENTIALS
-    ) 
-    PAUSE
-    EXIT /B %ERRORLEVEL%
-)
-IF /I "%1"=="-ter" (
-    ECHO.
-    CALL:ECHOBLUE "Se instalaran los siguientes programas: "
-    ECHO.
-    CALL:ECHOYELLOW "Chocolatey."
-    CALL:ECHOYELLOW "Terminus."
-    CALL:INSTALL_CHOCO
-    CALL:INSTALL_TERMINUS
-    PAUSE
-    EXIT /B %ERRORLEVEL%
-)
-IF /I "%1"=="--install-terminus" (
-    ECHO.
-    CALL:ECHOBLUE "Se instalaran los siguientes programas: "
-    ECHO.
-    CALL:ECHOYELLOW "Chocolatey."
-    CALL:ECHOYELLOW "Terminus."
-    CALL:INSTALL_CHOCO
-    CALL:INSTALL_TERMINUS
-    PAUSE
-    EXIT /B %ERRORLEVEL%
-)
-IF /I "%1"=="--unset-proxy" (
-    IF EXIST "C:\Program Files\Git\cmd" (
-        CALL:UNSET_GIT_PROXY
-    ) ELSE (
+    IF /I "%1"=="--configuration-1" (
         ECHO.
-        CALL:ECHORED "Git no esta instalado en el equipo"
-        EXIT /B 0
+        CALL:ECHOBLUE "Se instalaran los siguientes programas: "
+        ECHO.
+        CALL:ECHOYELLOW "Chocolatey."
+        CALL:ECHOYELLOW "Visual Studio Code."
+        CALL:ECHOYELLOW "Git."
+        CALL:INSTALL_CHOCO
+        CALL:INSTALL_CODE
+        CALL:INSTALL_GIT
+        CALL:PROXY_GIT
+        CALL:GIT_CREDENTIALS  
     )
-    PAUSE
-    EXIT /B %ERRORLEVEL%
-)
-IF /I "%1"=="-c1" (
-    ECHO.
-    CALL:ECHOBLUE "Se instalaran los siguientes programas: "
-    ECHO.
-    CALL:ECHOYELLOW "Chocolatey."
-    CALL:ECHOYELLOW "Visual Studio Code."
-    CALL:ECHOYELLOW "Git."
-    CALL:INSTALL_CHOCO
-    CALL:INSTALL_CODE
-    CALL:INSTALL_GIT
-    CALL:PROXY_GIT
-    CALL:GIT_CREDENTIALS
-    PAUSE
-    EXIT /B %ERRORLEVEL%
-)
-IF /I "%1"=="--configuration-1" (
-    ECHO.
-    CALL:ECHOBLUE "Se instalaran los siguientes programas: "
-    ECHO.
-    CALL:ECHOYELLOW "Chocolatey."
-    CALL:ECHOYELLOW "Visual Studio Code."
-    CALL:ECHOYELLOW "Git."
-    CALL:INSTALL_CHOCO
-    CALL:INSTALL_CODE
-    CALL:INSTALL_GIT
-    CALL:PROXY_GIT
-    CALL:GIT_CREDENTIALS
-    PAUSE
-    EXIT /B %ERRORLEVEL%
-)
+EXIT /B 0
 :HELP_MESSAGE
     ECHO.
     ECHO -?, --help
@@ -341,12 +301,16 @@ EXIT /B 0
 :UNSET_GIT_PROXY
     ECHO.
     git config --global --unset http.proxy
-    IF %ERRORLEVEL% NEQ 0 (
-        CALL:ECHORED "Error al retirar el proxy de Git."
-        ECHO.
-        CALL:ECHOYELLOW "RECOMENDACION: Cierra el terminal y ejecuta el comando de nuevo"
+    IF %ERRORLEVEL% EQU 5 (
+            CALL:ECHOYELLOW "No se encontro proxy registrado"
     ) ELSE (
-        CALL:ECHOGREEN "Proxy retirado""
+        IF %ERRORLEVEL% NEQ 0 (
+            CALL:ECHORED "Error al retirar el proxy de Git."
+            ECHO.
+            CALL:ECHOYELLOW "RECOMENDACION: Cierra el terminal y ejecuta el comando de nuevo"
+        ) ELSE (
+            CALL:ECHOGREEN "Proxy retirado"
+        )
     )
 EXIT /B 0
 :INSTALL_BEAUTIFY
