@@ -1,34 +1,58 @@
 @ECHO OFF  
 SETLOCAL
-::Logo
-ECHO.
-ECHO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-ECHO    ,ggg,        gg                                                   
-ECHO   dP""Y8b       dP              I8                                   
-ECHO   Yb, `88      d8'              I8                                   
-ECHO    `"  88    ,dP'            88888888                       gg       
-ECHO        88aaad8"                 I8                          ""       
-ECHO        88""""Yb,      ,ggggg,   I8     ,ggggg,   ,gggggg,   gg       
-ECHO        88     "8b    dP"  "Y8gggI8    dP"  "Y8gggdP""""8I   88       
-ECHO        88      `8i  i8'    ,8I ,I8,  i8'    ,8I ,8'    8I   88       
-ECHO        88       Yb,,d8,   ,d8',d88b,,d8,   ,d8',dP     Y8,_,88,_     
-ECHO        88        Y8P"Y8888P"  8P""Y8P"Y8888P"  8P      `Y88P""Y8     
-ECHO ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-ECHO.
-ECHO Creado por @CristianFonseca03.
-ECHO -^> github.com/CristianFonseca03/Kotori
-ECHO.
+SET VERSION=0.11
 NET SESSION >nul 2>&1
 IF %ERRORLEVEL% == 0 (
+    CALL:LOGO
     CALL:COMANDS %1 %2 %3
     ECHO.
     PAUSE
 ) ELSE (
-    CALL:ECHOYELLOW "Este programa se debe ejecutar en un entorno elvado de administrador."
-    ECHO.
-    PAUSE
+    SET ENTRY_=
+    SET VER_=
+    IF /I "%1"=="-v" (
+        SET ENTRY_=TRUE
+        SET VER_=TRUE
+    ) 
+    IF /I "%1"=="--version" (
+        SET ENTRY_=TRUE
+        SET VER_=TRUE
+    ) 
+    IF /I "%1"=="-?" SET ENTRY_=TRUE 
+    IF /I "%1"=="--help" SET ENTRY_=TRUE
+    IF DEFINED ENTRY_ (
+        IF NOT DEFINED VER_ (
+            CALL:LOGO
+        )
+        CALL:COMANDS %1
+    ) ELSE (
+        CALL:LOGO
+        CALL:ECHOYELLOW "Este programa se debe ejecutar en un entorno elevado de administrador."
+    )
 )
 EXIT /B %ERRORLEVEL%
+:LOGO
+    ECHO.
+    ECHO [48;5;48m                                                                      [0m
+    ECHO [48;5;48m  [38;5;118;48;5;239m                                                                  [48;5;48m  [0m
+    ECHO [48;5;48m  [38;5;118;48;5;239m   ,ggg,        gg                                                [48;5;48m  [0m
+    ECHO [48;5;48m  [38;5;118;48;5;239m  dP""Y8b       dP              I8                                [48;5;48m  [0m
+    ECHO [48;5;48m  [38;5;118;48;5;239m  Yb, `88      d8'              I8                                [48;5;48m  [0m
+    ECHO [48;5;48m  [38;5;118;48;5;239m   `"  88    ,dP'            88888888                       gg    [48;5;48m  [0m
+    ECHO [48;5;48m  [38;5;118;48;5;239m       88aaad8"                 I8                          ""    [48;5;48m  [0m
+    ECHO [48;5;48m  [38;5;118;48;5;239m       88""""Yb,      ,ggggg,   I8     ,ggggg,   ,gggggg,   gg    [48;5;48m  [0m
+    ECHO [48;5;48m  [38;5;118;48;5;239m       88     "8b    dP"  "Y8gggI8    dP"  "Y8gggdP""""8I   88    [48;5;48m  [0m
+    ECHO [48;5;48m  [38;5;118;48;5;239m       88      `8i  i8'    ,8I ,I8,  i8'    ,8I ,8'    8I   88    [48;5;48m  [0m
+    ECHO [48;5;48m  [38;5;118;48;5;239m       88       Yb,,d8,   ,d8',d88b,,d8,   ,d8',dP     Y8,_,88,_  [48;5;48m  [0m
+    ECHO [48;5;48m  [38;5;118;48;5;239m       88        Y8P"Y8888P"  8P""Y8P"Y8888P"  8P      `Y88P""Y8  [48;5;48m  [0m
+    ECHO [48;5;48m  [38;5;118;48;5;239m                                                                  [48;5;48m  [0m
+    ECHO [48;5;48m                                                                      [0m
+    CALL:ECHOGREEN "%VERSION%v."
+    ECHO.
+    ECHO [36;1mCreado por @CristianFonseca03.[0m
+    ECHO [32m-^> [36mgithub.com/CristianFonseca03/Kotori[0m
+    ECHO.
+GOTO:EOF
 :COMANDS
     IF /I "%1"=="" (
         CALL:HELP_MESSAGE
@@ -38,6 +62,12 @@ EXIT /B %ERRORLEVEL%
     )
     IF /I "%1"=="--help" (
         CALL:HELP_MESSAGE
+    )
+    IF /I "%1"=="-v" (
+        CALL:ECHOGREEN "Kotori %VERSION%v"
+    )
+    IF /I "%1"=="--version" (
+        CALL:ECHOGREEN "%VERSION%"
     )
     IF /I "%1"=="-ch" (
         ECHO.
@@ -73,7 +103,7 @@ EXIT /B %ERRORLEVEL%
             IF /I "%3"=="" (
                 ECHO.
                 CALL:ECHOYELLOW "ADVERTENCIA: Si se generan errores al instalar la extencion','"
-                CALL:ECHOYELLOW "se recomienda utilizarla bandera '-p' como tercer parametro."
+                CALL:ECHOYELLOW "se recomienda utilizarla bandera -p como tercer parametro."
                 ECHO.
                 ECHO Se instalaran las siguientes extensiones:
                 ECHO.
@@ -94,7 +124,7 @@ EXIT /B %ERRORLEVEL%
             IF /I "%3"=="" (
                 ECHO.
                 CALL:ECHOYELLOW "ADVERTENCIA: Si se generan errores al instalar la extencion','"
-                CALL:ECHOYELLOW "se recomienda utilizarla bandera '-p' como tercer parametro."
+                CALL:ECHOYELLOW "se recomienda utilizarla bandera -p como tercer parametro."
                 ECHO.
                 ECHO Se instalaran las siguientes extensiones:
                 ECHO.
@@ -115,7 +145,7 @@ EXIT /B %ERRORLEVEL%
             IF /I "%3"=="" (
                 ECHO.
                 CALL:ECHOYELLOW "ADVERTENCIA: Si se generan errores al instalar la extencion','"
-                CALL:ECHOYELLOW "se recomienda utilizarla bandera '-p' como tercer parametro."
+                CALL:ECHOYELLOW "se recomienda utilizarla bandera -p como tercer parametro."
                 ECHO.
                 ECHO Se instalaran las siguientes extensiones:
                 ECHO.
@@ -136,7 +166,7 @@ EXIT /B %ERRORLEVEL%
             IF /I "%3"=="" (
                 ECHO.
                 CALL:ECHOYELLOW "ADVERTENCIA: Si se generan errores al instalar la extencion','"
-                CALL:ECHOYELLOW "se recomienda utilizarla bandera '-p' como tercer parametro."
+                CALL:ECHOYELLOW "se recomienda utilizarla bandera -p como tercer parametro."
                 ECHO.
                 ECHO Se instalaran las siguientes extensiones:
                 ECHO.
@@ -166,7 +196,7 @@ EXIT /B %ERRORLEVEL%
             IF /I "%3"=="" (
                 ECHO.
                 CALL:ECHOYELLOW "ADVERTENCIA: Si se generan errores al instalar la extencion','"
-                CALL:ECHOYELLOW "se recomienda utilizarla bandera '-p' como tercer parametro."
+                CALL:ECHOYELLOW "se recomienda utilizarla bandera -p como tercer parametro."
                 ECHO.
                 ECHO Se instalaran las siguientes extensiones:
                 ECHO.
@@ -187,7 +217,7 @@ EXIT /B %ERRORLEVEL%
             IF /I "%3"=="" (
                 ECHO.
                 CALL:ECHOYELLOW "ADVERTENCIA: Si se generan errores al instalar la extencion','"
-                CALL:ECHOYELLOW "se recomienda utilizarla bandera '-p' como tercer parametro."
+                CALL:ECHOYELLOW "se recomienda utilizarla bandera -p como tercer parametro."
                 ECHO.
                 ECHO Se instalaran las siguientes extensiones:
                 ECHO.
@@ -208,7 +238,7 @@ EXIT /B %ERRORLEVEL%
             IF /I "%3"=="" (
                 ECHO.
                 CALL:ECHOYELLOW "ADVERTENCIA: Si se generan errores al instalar la extencion','"
-                CALL:ECHOYELLOW "se recomienda utilizarla bandera '-p' como tercer parametro."
+                CALL:ECHOYELLOW "se recomienda utilizarla bandera -p como tercer parametro."
                 ECHO.
                 ECHO Se instalaran las siguientes extensiones:
                 ECHO.
@@ -229,7 +259,7 @@ EXIT /B %ERRORLEVEL%
             IF /I "%3"=="" (
                 ECHO.
                 CALL:ECHOYELLOW "ADVERTENCIA: Si se generan errores al instalar la extencion','"
-                CALL:ECHOYELLOW "se recomienda utilizarla bandera '-p' como tercer parametro."
+                CALL:ECHOYELLOW "se recomienda utilizarla bandera -p como tercer parametro."
                 ECHO.
                 ECHO Se instalaran las siguientes extensiones:
                 ECHO.
@@ -342,7 +372,7 @@ EXIT /B %ERRORLEVEL%
         )
         IF /I "%2"=="" (
             CALL:ECHOYELLOW "ADVERTENCIA: Si se generan errores al instalar las extenciones','"
-            CALL:ECHOYELLOW "se recomienda utilizarla bandera '-p' como segundo parametro."
+            CALL:ECHOYELLOW "se recomienda utilizarla bandera -p como segundo parametro."
             ECHO.
             CALL:INSTALL_BEAUTIFY
             ECHO.
@@ -385,7 +415,7 @@ EXIT /B %ERRORLEVEL%
         )
         IF /I "%2"=="" (
             CALL:ECHOYELLOW "ADVERTENCIA: Si se generan errores al instalar las extenciones','"
-            CALL:ECHOYELLOW "se recomienda utilizarla bandera '-p' como segundo parametro."
+            CALL:ECHOYELLOW "se recomienda utilizarla bandera -p como segundo parametro."
             ECHO.
             CALL:INSTALL_BEAUTIFY
             ECHO.
@@ -399,9 +429,11 @@ EXIT /B %ERRORLEVEL%
     )
 EXIT /B 0
 :HELP_MESSAGE
-    ECHO.
     ECHO -?, --help
     ECHO    Imprime el menu de ayuda.
+    ECHO.
+    ECHO -v, --version
+    ECHO    Muestra la version de kotori actualmente instalada.
     ECHO.
     ECHO -ch, --install-chocolatey
     ECHO    Instala chocolatey.
@@ -409,8 +441,8 @@ EXIT /B 0
     ECHO -vs, --install-code
     ECHO    Instala Visual Studio Code.
     ECHO.
-    CALL:ECHOYELLOW "La bandera '-p' como tercer parametro, instalara las extenciones"
-    CALL:ECHOYELLOW "con los archivos vsix guardados en la carpeta 'vs-extensions'."
+    CALL:ECHOYELLOW "   La bandera -p como tercer parametro, instalara las extenciones"
+    CALL:ECHOYELLOW "   con los archivos vsix guardados en la carpeta 'vs-extensions'."
     ECHO.
     ECHO    -beautify
     ECHO    Instala Visual Studio Code con la extension 'Beautify'.
@@ -446,7 +478,7 @@ EXIT /B 0
     ECHO.
     CALL:ECHOBLUE "CONFIGURACIONES:"
     ECHO.
-    CALL:ECHOYELLOW "La bandera '-p' como segundo parametro, instalara las extenciones"
+    CALL:ECHOYELLOW "La bandera -p como segundo parametro, instalara las extenciones"
     CALL:ECHOYELLOW "con los archivos vsix guardados en la carpeta 'vs-extensions' y configurara"
     CALL:ECHOYELLOW "git con los siguientes parametros adicionales: "
     ECHO.
@@ -454,23 +486,23 @@ EXIT /B 0
     ECHO.
     ECHO -c1, --configuration-1
     ECHO.
-    CALL:ECHOYELLOW "Instala los siguientes programas:"
+    CALL:ECHOYELLOW "   Instala los siguientes programas:"
     ECHO.
-    ECHO Chocolatey.
-    ECHO Visual Studio Code.
-    ECHO Git.
+    ECHO    Chocolatey.
+    ECHO    Visual Studio Code.
+    ECHO    Git.
     ECHO.
-    CALL:ECHOYELLOW "Con la siguiente configuracion:"
+    CALL:ECHOYELLOW "   Con la siguiente configuracion:"
     ECHO.
-    ECHO git.user.name: 'Cristian Fonseca'
-    ECHO git.user.email: 'cristian.lfs@gmail.com'
+    ECHO    git.user.name: 'Cristian Fonseca'
+    ECHO    git.user.email: 'cristian.lfs@gmail.com'
     ECHO.
-    CALL:ECHOYELLOW "Con las siguientes extenciones de Visual Studio Code:"    
+    CALL:ECHOYELLOW "   Con las siguientes extenciones de Visual Studio Code:"    
     ECHO.
-    ECHO Beautify.
-    ECHO Material theme.
-    ECHO Material icon theme.
-    ECHO LiveServer.
+    ECHO    Beautify.
+    ECHO    Material theme.
+    ECHO    Material icon theme.
+    ECHO    LiveServer.
     ECHO.
 EXIT /B 0
 :INSTALL_CHOCO
@@ -615,17 +647,17 @@ EXIT /B 0
     CALL code --install-extension vs-extensions/ritwickdey.LiveServer-5.6.1.vsix
 EXIT /B 0       
 :ECHORED
-    %Windir%\System32\WindowsPowerShell\v1.0\Powershell.exe write-host -foregroundcolor Red %1
+    ECHO [31;1m%~1[0m
 GOTO:EOF
 :ECHOGREEN
-    %Windir%\System32\WindowsPowerShell\v1.0\Powershell.exe write-host -foregroundcolor Green %1
+    ECHO [32;1m%~1[0m
 GOTO:EOF
 :ECHOYELLOW
-    %Windir%\System32\WindowsPowerShell\v1.0\Powershell.exe write-host -foregroundcolor Yellow %1
+    ECHO [33;1m%~1[0m
 GOTO:EOF
 :ECHOBLUE
-    %Windir%\System32\WindowsPowerShell\v1.0\Powershell.exe write-host -foregroundcolor Blue %1
+    ECHO [34;1m%~1[0m
 GOTO:EOF
 :ECHOMAGENTA
-    %Windir%\System32\WindowsPowerShell\v1.0\Powershell.exe write-host -foregroundcolor Magenta %1
+    ECHO [35;1m%~1[0m
 GOTO:EOF
