@@ -3,9 +3,6 @@ SETLOCAL
 SET VERSION=0.12.2
 NET SESSION >nul 2>&1
 IF %ERRORLEVEL% == 0 (
-    IF NOT EXIST %~d0%~p0.installed (
-        FSUTIL FILE CREATENEW .installed 1 > NUL
-    )
     SET VER_=
     IF /I "%1"=="-v" SET VER_=TRUE
     IF /I "%1"=="--version" SET VER_=TRUE
@@ -61,19 +58,19 @@ EXIT /B 0
 GOTO:EOF
 :COMANDS
     SET HELP_=
-    SET VER_=
     SET CHOCO_=
     SET VSCODE_=
     SET GIT_=
     SET TER_=
     SET UP_=
     SET C1_=
+    SET ND_=
     IF /I "%1"=="" SET HELP_=TRUE
     IF /I "%1"=="-?" SET HELP_=TRUE
     IF /I "%1"=="-h" SET HELP_=TRUE
     IF /I "%1"=="--help" SET HELP_=TRUE
-    IF /I "%1"=="-v" SET VER_=TRUE
-    IF /I "%1"=="--version" SET VER_=TRUE
+    IF /I "%1"=="-v" CALL:ECHOGREEN "Kotori %VERSION%v"
+    IF /I "%1"=="--version" CALL:ECHOGREEN "%VERSION%"
     IF /I "%1"=="-ch" SET CHOCO_=TRUE
     IF /I "%1"=="--install-chocolatey" SET CHOCO_=TRUE
     IF /I "%1"=="-vs" SET VSCODE_=TRUE
@@ -87,149 +84,136 @@ GOTO:EOF
     IF /I "%1"=="-c1" SET C1_=TRUE
     IF /I "%1"=="--configuration-1" SET C1_=TRUE
     IF DEFINED HELP_ (
-        ECHO HELP
-    )
-    IF DEFINED VER_ (
-        ECHO VER
+        SET ND_=TRUE
+        CALL:HELP_MESSAGE
     )
     IF DEFINED CHOCO_ (
-        ECHO CHOCO
+        SET ND_=TRUE
+        SET INSTALLED =
+        IF EXIST %~d0%~p0\.installed (
+            FOR /F "delims=;" %%A IN (%~d0%~p0\.installed) DO (
+                IF "%%A" == "CHOCOLATEY" SET INSTALLED=TRUE
+            )
+        )
+        IF DEFINED INSTALLED (
+            CALL:ECHOYELLOW "Chocolatey ya se encuentra instalado."
+            ECHO.
+        ) ELSE (
+            CALL:ECHOBLUE "Se instalaran los siguientes programas: "
+            ECHO.
+            CALL:ECHOMAGENTA "Chocolatey."
+            ECHO.
+            GOTO:INSTALL_CHOCO
+        )
     )
     IF DEFINED VSCODE_ (
-        ECHO VSCODE
+        SET ND_=TRUE
+        SET INSTALLED =
+        IF EXIST %~d0%~p0\.installed (
+            FOR /F "delims=;" %%A IN (%~d0%~p0\.installed) DO (
+                IF "%%A" == "VSCODE" SET INSTALLED=TRUE
+            )
+        )
+        IF DEFINED INSTALLED (
+            CALL:ECHOYELLOW "Visual Studio Code ya se encuentra instalado."
+            ECHO.
+        ) ELSE (
+            ECHO.
+            CALL:ECHOBLUE "Se instalaran los siguientes programas: "
+            ECHO.
+            CALL:ECHOMAGENTA "Visual Studio Code."
+            ECHO.
+            GOTO:INSTALL_CODE
+        )
+        IF /I "%2"=="-beautify" (
+            IF /I "%3"=="-p" (
+                ECHO.
+                ECHO Se instalaran las siguientes extensiones:
+                ECHO.
+                CALL:ECHOYELLOW "Beautify."
+                ECHO.
+                CALL:INSTALL_BEAUTIFY_P
+            )
+            IF /I "%3"=="" (
+                ECHO.
+                CALL:ECHOYELLOW "ADVERTENCIA: Si se generan errores al instalar la extencion','"
+                CALL:ECHOYELLOW "se recomienda utilizarla bandera -p como tercer parametro."
+                ECHO.
+                ECHO Se instalaran las siguientes extensiones:
+                ECHO.
+                CALL:ECHOYELLOW "Beautify."
+                ECHO.
+                CALL:INSTALL_BEAUTIFY
+            )
+        ) 
+        REM TODO: Actualizar extensiones para funcionar con proxi
+        IF /I "%2"=="-material-theme" (
+            CALL:ECHOYELLOW "Se instalaran las siguientes extensiones:"
+            ECHO.
+            CALL:ECHOMAGENTA "Material Theme"
+            ECHO.
+            CALL:ECHOYELLOW "Instalando Material Theme..."
+            CALL:INSTALL_MATERIAL_THEME %3
+            ECHO.
+            CALL:ECHOYELLOW "ALERTA: Si no se instalan las extensiones, revisa si estas bajo un proxy e intenta con la bandera -p. /? para ver el menu de ayuda"
+        )
+        IF /I "%2"=="-material-icon" (
+            IF /I "%3"=="-p" (
+                ECHO.
+                ECHO Se instalaran las siguientes extensiones:
+                ECHO.
+                CALL:ECHOYELLOW "Material Icon Theme"
+                ECHO.
+                CALL:INSTALL_MATERIAL_ICON_P
+            )
+            IF /I "%3"=="" (
+                ECHO.
+                CALL:ECHOYELLOW "ADVERTENCIA: Si se generan errores al instalar la extencion','"
+                CALL:ECHOYELLOW "se recomienda utilizarla bandera -p como tercer parametro."
+                ECHO.
+                ECHO Se instalaran las siguientes extensiones:
+                ECHO.
+                CALL:ECHOYELLOW "Material Icon Theme"
+                ECHO.
+                CALL:INSTALL_MATERIAL_ICON
+            )
+        )
+        IF /I "%2"=="-live-server" (
+            IF /I "%3"=="-p" (
+                ECHO.
+                ECHO Se instalaran las siguientes extensiones:
+                ECHO.
+                CALL:ECHOYELLOW "Live Server"
+                ECHO.
+                CALL:INSTALL_LIVE_SERVER_P
+            )
+            IF /I "%3"=="" (
+                ECHO.
+                CALL:ECHOYELLOW "ADVERTENCIA: Si se generan errores al instalar la extencion','"
+                CALL:ECHOYELLOW "se recomienda utilizarla bandera -p como tercer parametro."
+                ECHO.
+                ECHO Se instalaran las siguientes extensiones:
+                ECHO.
+                CALL:ECHOYELLOW "Live Server"
+                ECHO.
+                CALL:INSTALL_LIVE_SERVER
+            )
+        )
     )
+    REM TODO: terminar todos los instaladores
     IF DEFINED GIT_ (
-        ECHO GIT
+        SET ND_=TRUE
     )
     IF DEFINED TER_ (
-        ECHO TER
+        SET ND_=TRUE
     )
     IF DEFINED UP_ (
-        ECHO UP
+        SET ND_=TRUE
     )
     IF DEFINED C1_ (
-        ECHO C1
+        SET ND_=TRUE
     )
     REM TODO: ARREGLAR ERROR
-    REM IF /I "%1"=="-?" (
-    REM     CALL:HELP_MESSAGE
-    REM )
-    REM IF /I "%1"=="-v" (
-    REM     CALL:ECHOGREEN "Kotori %VERSION%v"
-    REM )
-    REM IF /I "%1"=="--version" (
-    REM     CALL:ECHOGREEN "%VERSION%"
-    REM )
-    REM IF /I "%1"=="-ch" (
-    REM     SET INSTALLED =
-    REM     IF EXIST %~d0%~p0\.installed (
-    REM         FOR /F "delims=;" %%A IN (%~d0%~p0\.installed) DO (
-    REM             IF "%%A" == "CHOCOLATEY" SET INSTALLED=TRUE
-    REM         )
-    REM     )
-    REM     IF DEFINED INSTALLED (
-    REM         CALL:ECHOYELLOW "Chocolatey ya se encuentra instalado."
-    REM         ECHO.
-    REM     ) ELSE (
-    REM         CALL:ECHOBLUE "Se instalaran los siguientes programas: "
-    REM         ECHO.
-    REM         CALL:ECHOMAGENTA "Chocolatey."
-    REM         ECHO.
-    REM         GOTO:INSTALL_CHOCO
-    REM     )
-    REM )
-    REM IF /I "%1"=="-vs" (
-    REM     SET INSTALLED =
-    REM     IF EXIST %~d0%~p0\.installed (
-    REM         FOR /F "delims=;" %%A IN (%~d0%~p0\.installed) DO (
-    REM             IF "%%A" == "VSCODE" SET INSTALLED=TRUE
-    REM         )
-    REM     )
-    REM     IF DEFINED INSTALLED (
-    REM         CALL:ECHOYELLOW "Visual Studio Code ya se encuentra instalado."
-    REM         ECHO.
-    REM     ) ELSE (
-    REM         ECHO.
-    REM         CALL:ECHOBLUE "Se instalaran los siguientes programas: "
-    REM         ECHO.
-    REM         CALL:ECHOMAGENTA "Visual Studio Code."
-    REM         ECHO.
-    REM         GOTO:INSTALL_CODE
-    REM     )Ñ
-    REM     IF /I "%2"=="-beautify" (
-    REM         IF /I "%3"=="-p" (
-    REM             ECHO.
-    REM             ECHO Se instalaran las siguientes extensiones:
-    REM             ECHO.
-    REM             CALL:ECHOYELLOW "Beautify."
-    REM             ECHO.
-    REM             CALL:INSTALL_BEAUTIFY_P
-    REM         )
-    REM         IF /I "%3"=="" (
-    REM             ECHO.
-    REM             CALL:ECHOYELLOW "ADVERTENCIA: Si se generan errores al instalar la extencion','"
-    REM             CALL:ECHOYELLOW "se recomienda utilizarla bandera -p como tercer parametro."
-    REM             ECHO.
-    REM             ECHO Se instalaran las siguientes extensiones:
-    REM             ECHO.
-    REM             CALL:ECHOYELLOW "Beautify."
-    REM             ECHO.
-    REM             CALL:INSTALL_BEAUTIFY
-    REM         )
-    REM     ) 
-    REM     IF /I "%2"=="-material-theme" (
-    REM         CALL:ECHOYELLOW "Se instalaran las siguientes extensiones:"
-    REM         ECHO.
-    REM         CALL:ECHOMAGENTA "Material Theme"
-    REM         ECHO.
-    REM         CALL:ECHOYELLOW "Instalando Material Theme..."
-    REM         CALL:INSTALL_MATERIAL_THEME %3
-    REM         ECHO.
-    REM         CALL:ECHOYELLOW "ALERTA: Si no se instalan las extensiones, revisa si estas bajo un proxy e intenta con la bandera -p. /? para ver el menu de ayuda"
-    REM     )
-    REM     IF /I "%2"=="-material-icon" (
-    REM         IF /I "%3"=="-p" (
-    REM             ECHO.
-    REM             ECHO Se instalaran las siguientes extensiones:
-    REM             ECHO.
-    REM             CALL:ECHOYELLOW "Material Icon Theme"
-    REM             ECHO.
-    REM             CALL:INSTALL_MATERIAL_ICON_P
-    REM         )
-    REM         IF /I "%3"=="" (
-    REM             ECHO.
-    REM             CALL:ECHOYELLOW "ADVERTENCIA: Si se generan errores al instalar la extencion','"
-    REM             CALL:ECHOYELLOW "se recomienda utilizarla bandera -p como tercer parametro."
-    REM             ECHO.
-    REM             ECHO Se instalaran las siguientes extensiones:
-    REM             ECHO.
-    REM             CALL:ECHOYELLOW "Material Icon Theme"
-    REM             ECHO.
-    REM             CALL:INSTALL_MATERIAL_ICON
-    REM         )
-    REM     )
-    REM     IF /I "%2"=="-live-server" (
-    REM         IF /I "%3"=="-p" (
-    REM             ECHO.
-    REM             ECHO Se instalaran las siguientes extensiones:
-    REM             ECHO.
-    REM             CALL:ECHOYELLOW "Live Server"
-    REM             ECHO.
-    REM             CALL:INSTALL_LIVE_SERVER_P
-    REM         )
-    REM         IF /I "%3"=="" (
-    REM             ECHO.
-    REM             CALL:ECHOYELLOW "ADVERTENCIA: Si se generan errores al instalar la extencion','"
-    REM             CALL:ECHOYELLOW "se recomienda utilizarla bandera -p como tercer parametro."
-    REM             ECHO.
-    REM             ECHO Se instalaran las siguientes extensiones:
-    REM             ECHO.
-    REM             CALL:ECHOYELLOW "Live Server"
-    REM             ECHO.
-    REM             CALL:INSTALL_LIVE_SERVER
-    REM         )
-    REM     )
-    REM )
     REM IF /I "%1"=="-git" (
     REM     SET INSTALLED = 
     REM     IF EXIST %~d0%~p0\.installed (
