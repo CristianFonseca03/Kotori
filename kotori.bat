@@ -1,24 +1,30 @@
-@ECHO OFF  
+@ECHO OFF
 SETLOCAL
-SET VERSION=0.11
+SET VERSION=0.12.1
 NET SESSION >nul 2>&1
 IF %ERRORLEVEL% == 0 (
-    CALL:LOGO
+    IF NOT EXIST %~d0%~p0.installed (
+        REM TODO: crear archivo .installed
+    )
+    SET VER_=
+    IF /I "%1"=="-v" SET VER_=TRUE
+    IF /I "%1"=="--version" SET VER_=TRUE
+    IF NOT DEFINED VER_ (
+        CALL:LOGO
+    )
     CALL:COMANDS %1 %2 %3
-    ECHO.
-    PAUSE
 ) ELSE (
     SET ENTRY_=
     SET VER_=
     IF /I "%1"=="-v" (
         SET ENTRY_=TRUE
         SET VER_=TRUE
-    ) 
+    )
     IF /I "%1"=="--version" (
         SET ENTRY_=TRUE
         SET VER_=TRUE
-    ) 
-    IF /I "%1"=="-?" SET ENTRY_=TRUE 
+    )
+    IF /I "%1"=="-?" SET ENTRY_=TRUE
     IF /I "%1"=="--help" SET ENTRY_=TRUE
     IF DEFINED ENTRY_ (
         IF NOT DEFINED VER_ (
@@ -30,7 +36,7 @@ IF %ERRORLEVEL% == 0 (
         CALL:ECHOYELLOW "Este programa se debe ejecutar en un entorno elevado de administrador."
     )
 )
-EXIT /B %ERRORLEVEL%
+EXIT /B 0
 :LOGO
     ECHO.
     ECHO [48;5;48m                                                                      [0m
@@ -70,27 +76,60 @@ GOTO:EOF
         CALL:ECHOGREEN "%VERSION%"
     )
     IF /I "%1"=="-ch" (
-        ECHO.
-        CALL:ECHOBLUE "Se instalaran los siguientes programas: "
-        ECHO.
-        CALL:ECHOYELLOW "Chocolatey."
-        CALL:INSTALL_CHOCO
+        SET INSTALLED =
+        IF EXIST %~d0%~p0\.installed (
+            FOR /F "delims=;" %%A IN (%~d0%~p0\.installed) DO (
+                IF "%%A" == "CHOCOLATEY" SET INSTALLED=TRUE
+            )
+        )
+        IF DEFINED INSTALLED (
+            CALL:ECHOYELLOW "Chocolatey ya se encuentra instalado."
+            ECHO.
+        ) ELSE (
+            CALL:ECHOBLUE "Se instalaran los siguientes programas: "
+            ECHO.
+            CALL:ECHOMAGENTA "Chocolatey."
+            ECHO.
+            GOTO:INSTALL_CHOCO
+        )
     )
     IF /I "%1"=="--install-chocolatey" (
-        ECHO.
-        CALL:ECHOBLUE "Se instalaran los siguientes programas: "
-        ECHO.
-        CALL:ECHOYELLOW "Chocolatey."
-        CALL:INSTALL_CHOCO
+        SET INSTALLED =
+        IF EXIST %~d0%~p0\.installed (
+            FOR /F "delims=;" %%A IN (%~d0%~p0\.installed) DO (
+                IF "%%A" == "CHOCOLATEY" SET INSTALLED=TRUE
+            )
+        )
+        IF DEFINED INSTALLED (
+            CALL:ECHOYELLOW "Chocolatey ya se encuentra instalado."
+            ECHO.
+        ) ELSE (
+            ECHO.
+            CALL:ECHOBLUE "Se instalaran los siguientes programas: "
+            ECHO.
+            CALL:ECHOMAGENTA "Chocolatey."
+            ECHO.
+            GOTO:INSTALL_CHOCO
+        )
     )
     IF /I "%1"=="-vs" (
-        ECHO.
-        CALL:ECHOBLUE "Se instalaran los siguientes programas: "
-        ECHO.
-        CALL:ECHOYELLOW "Chocolatey."
-        CALL:ECHOYELLOW "Visual Studio Code."
-        CALL:INSTALL_CHOCO
-        CALL:INSTALL_CODE
+        SET INSTALLED =
+        IF EXIST %~d0%~p0\.installed (
+            FOR /F "delims=;" %%A IN (%~d0%~p0\.installed) DO (
+                IF "%%A" == "VSCODE" SET INSTALLED=TRUE
+            )
+        )
+        IF DEFINED INSTALLED (
+            CALL:ECHOYELLOW "Visual Studio Code ya se encuentra instalado."
+            ECHO.
+        ) ELSE (
+            ECHO.
+            CALL:ECHOBLUE "Se instalaran los siguientes programas: "
+            ECHO.
+            CALL:ECHOMAGENTA "Visual Studio Code."
+            ECHO.
+            GOTO:INSTALL_CODE
+        )Ñ
         IF /I "%2"=="-beautify" (
             IF /I "%3"=="-p" (
                 ECHO.
@@ -113,25 +152,14 @@ GOTO:EOF
             )
         ) 
         IF /I "%2"=="-material-theme" (
-            IF /I "%3"=="-p" (
-                ECHO.
-                ECHO Se instalaran las siguientes extensiones:
-                ECHO.
-                CALL:ECHOYELLOW "Material Theme"
-                ECHO.
-                CALL:INSTALL_MATERIAL_THEME_P
-            )
-            IF /I "%3"=="" (
-                ECHO.
-                CALL:ECHOYELLOW "ADVERTENCIA: Si se generan errores al instalar la extencion','"
-                CALL:ECHOYELLOW "se recomienda utilizarla bandera -p como tercer parametro."
-                ECHO.
-                ECHO Se instalaran las siguientes extensiones:
-                ECHO.
-                CALL:ECHOYELLOW "Material Theme"
-                ECHO.
-                CALL:INSTALL_MATERIAL_THEME
-            )
+            CALL:ECHOYELLOW "Se instalaran las siguientes extensiones:"
+            ECHO.
+            CALL:ECHOMAGENTA "Material Theme"
+            ECHO.
+            CALL:ECHOYELLOW "Instalando Material Theme..."
+            CALL:INSTALL_MATERIAL_THEME %3
+            ECHO.
+            CALL:ECHOYELLOW "ALERTA: Si no se instalan las extensiones, revisa si estas bajo un proxy e intenta con la bandera -p. /? para ver el menu de ayuda"
         )
         IF /I "%2"=="-material-icon" (
             IF /I "%3"=="-p" (
@@ -174,16 +202,26 @@ GOTO:EOF
                 ECHO.
                 CALL:INSTALL_LIVE_SERVER
             )
-        ) 
-    ) 
+        )
+    )
     IF /I "%1"=="--install-code" (
-        ECHO.
-        CALL:ECHOBLUE "Se instalaran los siguientes programas: "
-        ECHO.
-        CALL:ECHOYELLOW "Chocolatey."
-        CALL:ECHOYELLOW "Visual Studio Code."
-        CALL:INSTALL_CHOCO
-        CALL:INSTALL_CODE
+        SET INSTALLED =
+        IF EXIST %~d0%~p0\.installed (
+            FOR /F "delims=;" %%A IN (%~d0%~p0\.installed) DO (
+                IF "%%A" == "VSCODE" SET INSTALLED=TRUE
+            )
+        )
+        IF DEFINED INSTALLED (
+            CALL:ECHOYELLOW "Visual Studio Code ya se encuentra instalado."
+            ECHO.
+        ) ELSE (
+            ECHO.
+            CALL:ECHOBLUE "Se instalaran los siguientes programas: "
+            ECHO.
+            CALL:ECHOMAGENTA "Visual Studio Code."
+            ECHO.
+            GOTO:INSTALL_CODE
+        )
         IF /I "%2"=="-beautify" (
             IF /I "%3"=="-p" (
                 ECHO.
@@ -204,7 +242,7 @@ GOTO:EOF
                 ECHO.
                 CALL:INSTALL_BEAUTIFY
             )
-        ) 
+        )
         IF /I "%2"=="-material-theme" (
             IF /I "%3"=="-p" (
                 ECHO.
@@ -270,13 +308,23 @@ GOTO:EOF
         ) 
     )
     IF /I "%1"=="-git" (
-        ECHO.
-        CALL:ECHOBLUE "Se instalaran los siguientes programas: "
-        ECHO.
-        CALL:ECHOYELLOW "Chocolatey."
-        CALL:ECHOYELLOW "Git."
-        CALL:INSTALL_CHOCO
-        CALL:INSTALL_GIT
+        SET INSTALLED = 
+        IF EXIST %~d0%~p0\.installed (
+            FOR /F "delims=;" %%A IN (%~d0%~p0\.installed) DO (
+                IF "%%A" == "GIT" SET INSTALLED=TRUE
+            )
+        )
+        IF DEFINED INSTALLED (
+            CALL:ECHOYELLOW "Git ya se encuentra instalado."
+            ECHO.
+        ) ELSE (
+            ECHO.
+            CALL:ECHOBLUE "Se instalaran los siguientes programas: "
+            ECHO.
+            CALL:ECHOMAGENTA "Git."
+            ECHO.
+            GOTO:INSTALL_GIT
+        )
         IF /I "%2"=="--configure-proxy" (
             CALL:PROXY_GIT
         )
@@ -288,40 +336,32 @@ GOTO:EOF
         )
         IF /I "%2"=="-c" (
             CALL:GIT_CREDENTIALS
-        )    
+        )
     )
     IF /I "%1"=="--install-git" (
-        ECHO.
-        CALL:ECHOBLUE "Se instalaran los siguientes programas: "
-        ECHO.
-        CALL:ECHOYELLOW "Chocolatey."
-        CALL:ECHOYELLOW "Git."
-        CALL:INSTALL_CHOCO
-        CALL:INSTALL_GIT
+        SET INSTALLED =
+        IF EXIST %~d0%~p0\.installed (
+            FOR /F "delims=;" %%A IN (%~d0%~p0\.installed) DO (
+                IF "%%A" == "GIT" SET INSTALLED=TRUE
+            )
+        )
+        IF DEFINED INSTALLED (
+            CALL:ECHOYELLOW "Git ya se encuentra instalado."
+            ECHO.
+        ) ELSE (
+            ECHO.
+            CALL:ECHOBLUE "Se instalaran los siguientes programas: "
+            ECHO.
+            CALL:ECHOMAGENTA "Git."
+            ECHO.
+            GOTO:INSTALL_GIT
+        )
         IF /I "%2"=="--configure-proxy" (
             CALL:PROXY_GIT
         )
         IF /I "%2"=="--set-credentials" (
             CALL:GIT_CREDENTIALS
-        ) 
-    )
-    IF /I "%1"=="-ter" (
-        ECHO.
-        CALL:ECHOBLUE "Se instalaran los siguientes programas: "
-        ECHO.
-        CALL:ECHOYELLOW "Chocolatey."
-        CALL:ECHOYELLOW "Terminus."
-        CALL:INSTALL_CHOCO
-        CALL:INSTALL_TERMINUS
-    )
-    IF /I "%1"=="--install-terminus" (
-        ECHO.
-        CALL:ECHOBLUE "Se instalaran los siguientes programas: "
-        ECHO.
-        CALL:ECHOYELLOW "Chocolatey."
-        CALL:ECHOYELLOW "Terminus."
-        CALL:INSTALL_CHOCO
-        CALL:INSTALL_TERMINUS 
+        )
     )
     IF /I "%1"=="-up" (
         IF EXIST "C:\Program Files\Git\cmd" (
@@ -330,7 +370,7 @@ GOTO:EOF
             ECHO.
             CALL:ECHORED "Git no esta instalado en el equipo"
             EXIT /B 0
-        ) 
+        )
     )
     IF /I "%1"=="--unset-proxy" (
         IF EXIST "C:\Program Files\Git\cmd" (
@@ -339,7 +379,45 @@ GOTO:EOF
             ECHO.
             CALL:ECHORED "Git no esta instalado en el equipo"
             EXIT /B 0
-        ) 
+        )
+    )
+    IF /I "%1"=="-ter" (
+        SET INSTALLED =
+        IF EXIST %~d0%~p0\.installed (
+            FOR /F "delims=;" %%A IN (%~d0%~p0\.installed) DO (
+                IF "%%A" == "TERMINUS" SET INSTALLED=TRUE
+            )
+        )
+        IF DEFINED INSTALLED (
+            CALL:ECHOYELLOW "Terminus ya se encuentra instalado."
+            ECHO.
+        ) ELSE (
+            ECHO.
+            CALL:ECHOBLUE "Se instalaran los siguientes programas: "
+            ECHO.
+            CALL:ECHOMAGENTA "Terminus."
+            ECHO.
+            GOTO:INSTALL_TERMINUS
+        )
+    )
+    IF /I "%1"=="--install-terminus" (
+        SET INSTALLED =
+        IF EXIST %~d0%~p0\.installed (
+            FOR /F "delims=;" %%A IN (%~d0%~p0\.installed) DO (
+                IF "%%A" == "TERMINUS" SET INSTALLED=TRUE
+            )
+        )
+        IF DEFINED INSTALLED (
+            CALL:ECHOYELLOW "Terminus ya se encuentra instalado."
+            ECHO.
+        ) ELSE (
+            ECHO.
+            CALL:ECHOBLUE "Se instalaran los siguientes programas: "
+            ECHO.
+            CALL:ECHOMAGENTA "Terminus."
+            ECHO.
+            GOTO:INSTALL_TERMINUS
+        )
     )
     IF /I "%1"=="-c1" (
         ECHO.
@@ -497,84 +575,62 @@ EXIT /B 0
     ECHO    git.user.name: 'Cristian Fonseca'
     ECHO    git.user.email: 'cristian.lfs@gmail.com'
     ECHO.
-    CALL:ECHOYELLOW "   Con las siguientes extenciones de Visual Studio Code:"    
+    CALL:ECHOYELLOW "   Con las siguientes extenciones de Visual Studio Code:"
     ECHO.
     ECHO    Beautify.
     ECHO    Material theme.
     ECHO    Material icon theme.
     ECHO    LiveServer.
-    ECHO.
 EXIT /B 0
 :INSTALL_CHOCO
-    IF EXIST "C:\ProgramData\chocolatey" (
+    CALL:ECHOYELLOW "Instalando Chocolatey..."
+    call %~d0%~p0installers\install_choco.bat
+    IF not %ERRORLEVEL% == 0 (
         ECHO.
-        CALL:ECHOMAGENTA "Chocolatey ya se encuentra instalado."
+        CALL:ECHORED "Error inesperado durante la instalacion."
     ) ELSE (
         ECHO.
-        CALL:ECHOGREEN "Instalando Chocolatey."
-        ECHO.
-        @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))" && SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
-        ECHO.
-        IF %ERRORLEVEL% NEQ 0 (
-            CALL:ECHORED "Error al instalar chocolatey."
-        ) ELSE (
-            CALL:ECHOGREEN "Chocolatey se ha instalado satisfactoriamente."
-        )
+        CALL:ECHOGREEN "Chocolatey instalado satisafactoriamente."
+        ECHO CHOCOLATEY; >> %~d0%~p0.installed
     )
-EXIT /B 0
+GOTO:EOF
 :INSTALL_CODE
-    IF EXIST "C:\Program Files\Microsoft VS Code" (
+    CALL:ECHOYELLOW "Instalando Visual Studio Code..."
+    CALL choco install vscode -y >nul
+    IF not %ERRORLEVEL% == 0 (
         ECHO.
-        CALL:ECHOMAGENTA "Visual Studio Code ya se encuentra instalado."
+        CALL:ECHORED "Error inesperado durante la instalacion."
     ) ELSE (
         ECHO.
-        CALL:ECHOGREEN "Instalando Visual Studio Code."
-        ECHO.
-        choco install vscode -y
-        ECHO.
-        IF %ERRORLEVEL% NEQ 0 (
-            CALL:ECHORED "Error al instalar Visual Studio Code."
-        ) ELSE (
-            CALL:ECHOGREEN "Visual Studio Code se ha instalado satisfactoriamente."
-        )
+        CALL:ECHOGREEN "Visual Studio Code instalado satisafactoriamente."
+        ECHO VSCODE; >> %~d0%~p0.installed
     )
-EXIT /B 0
-:INSTALL_TERMINUS
-    IF EXIST "%LOCALAPPDATA%\Programs\Terminus" (
-        ECHO.
-        CALL:ECHOMAGENTA "Terminus ya se encuentra instalado."
-    ) ELSE (
-        ECHO.
-        CALL:ECHOGREEN "Instalando Terminus."
-        ECHO.
-        choco install terminus -y
-        ECHO.
-        IF %ERRORLEVEL% NEQ 0 (
-            CALL:ECHORED "Error al instalar Terminus."
-        ) ELSE (
-            CALL:ECHOGREEN "Terminus se ha instalado satisfactoriamente."
-        )
-    )
-EXIT /B 0
+GOTO:EOF
 :INSTALL_GIT
-    IF EXIST "C:\Program Files\Git\cmd" (
+    CALL:ECHOYELLOW "Instalando Git..."
+    CALL choco install git -y >nul
+    IF not %ERRORLEVEL% == 0 (
         ECHO.
-        CALL:ECHOMAGENTA "Git ya se encuentra instalado."
+        CALL:ECHORED "Error inesperado durante la instalacion."
     ) ELSE (
         ECHO.
-        CALL:ECHOGREEN "Instalando git."
-        ECHO.
-        choco install git -y
-        ECHO.
-        IF %ERRORLEVEL% NEQ 0 (
-            CALL:ECHORED "Error al instalar Git."
-        ) ELSE (
-            CALL:ECHOGREEN "Git se ha instalado satisfactoriamente."
-        )
+        CALL:ECHOGREEN "Git instalado satisafactoriamente."
+        ECHO GIT; >> %~d0%~p0.installed
     )
-EXIT /B 0
+GOTO:EOF
+:INSTALL_TERMINUS
+    CALL:ECHOYELLOW "Instalando Terminus..."
+    CALL choco install terminus -y >nul
+    IF not %ERRORLEVEL% == 0 (
+        ECHO.
+        CALL:ECHORED "Error inesperado durante la instalacion."
+    ) ELSE (
+        ECHO.
+        CALL:ECHOGREEN "Terminus instalado satisafactoriamente."
+        ECHO TERMINUS; >> %~d0%~p0.installed
+    )
+GOTO:EOF
 :PROXY_GIT
-    ECHO.
     CALL:ECHOBLUE "Se configurara el proxy de git con la siguiente configuracion: "
     ECHO.
     ECHO git.proxy: 192.168.3.5:8080
@@ -589,7 +645,6 @@ EXIT /B 0
     )
 EXIT /B 0
 :GIT_CREDENTIALS
-    ECHO.
     CALL:ECHOBLUE "Se configurara las credenciales de git con la siguiente configuracion: "
     ECHO.
     ECHO git.user.name: 'Cristian Fonseca'
@@ -607,7 +662,6 @@ EXIT /B 0
     )
 EXIT /B 0
 :UNSET_GIT_PROXY
-    ECHO.
     git config --global --unset http.proxy
     IF %ERRORLEVEL% EQU 5 (
             CALL:ECHOYELLOW "No se encontro proxy registrado"
@@ -626,26 +680,27 @@ EXIT /B 0
     CALL code --install-extension hookyqr.beautify
 EXIT /B 0
 :INSTALL_MATERIAL_THEME
-    CALL code --install-extension equinusocio.vsc-material-theme
-EXIT /B 0     
+    IF /I "%1"=="-p" (
+        code --install-extension vs-extensions/Equinusocio.vsc-material-theme-30.0.0.vsix > nul
+    ) ELSE (
+        code --install-extension equinusocio.vsc-material-theme > nul
+    )
+GOTO:EOF
 :INSTALL_MATERIAL_ICON
     CALL code --install-extension pkief.material-icon-theme
-EXIT /B 0 
+EXIT /B 0
 :INSTALL_LIVE_SERVER
     CALL code --install-extension ritwickdey.liveserver
-EXIT /B 0   
+EXIT /B 0
 :INSTALL_BEAUTIFY_P
     CALL code --install-extension vs-extensions/HookyQR.beautify-1.5.0.vsix
 EXIT /B 0
-:INSTALL_MATERIAL_THEME_P
-    CALL code --install-extension vs-extensions/Equinusocio.vsc-material-theme-30.0.0.vsix
-EXIT /B 0     
 :INSTALL_MATERIAL_ICON_P
     CALL code --install-extension vs-extensions/PKief.material-icon-theme-3.9.0.vsix
-EXIT /B 0 
+EXIT /B 0
 :INSTALL_LIVE_SERVER_P
     CALL code --install-extension vs-extensions/ritwickdey.LiveServer-5.6.1.vsix
-EXIT /B 0       
+EXIT /B 0
 :ECHORED
     ECHO [31;1m%~1[0m
 GOTO:EOF
