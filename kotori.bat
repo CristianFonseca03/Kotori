@@ -1,6 +1,6 @@
 @ECHO OFF
 SETLOCAL
-SET VERSION=0.12.1
+SET VERSION=0.12.2
 NET SESSION >nul 2>&1
 IF %ERRORLEVEL% == 0 (
     IF NOT EXIST %~d0%~p0.installed (
@@ -678,7 +678,11 @@ EXIT /B 0
 EXIT /B 0
 ::VsCode extensions
 :INSTALL_BEAUTIFY
-    CALL code --install-extension hookyqr.beautify
+    IF /I "%1"=="-p" (
+        code --install-extension vs-extensions/HookyQR.beautify-1.5.0.vsix > nul
+    ) ELSE (
+        code --install-extension hookyqr.beautify > nul
+    )
 EXIT /B 0
 :INSTALL_MATERIAL_THEME
     IF /I "%1"=="-p" (
@@ -688,19 +692,18 @@ EXIT /B 0
     )
 GOTO:EOF
 :INSTALL_MATERIAL_ICON
-    CALL code --install-extension pkief.material-icon-theme
+    IF /I "%1"=="-p" (
+        code --install-extension vs-extensions/PKief.material-icon-theme-3.9.0.vsix > nul
+    ) ELSE (
+        code --install-extension pkief.material-icon-theme > nul
+    )
 EXIT /B 0
 :INSTALL_LIVE_SERVER
-    CALL code --install-extension ritwickdey.liveserver
-EXIT /B 0
-:INSTALL_BEAUTIFY_P
-    CALL code --install-extension vs-extensions/HookyQR.beautify-1.5.0.vsix
-EXIT /B 0
-:INSTALL_MATERIAL_ICON_P
-    CALL code --install-extension vs-extensions/PKief.material-icon-theme-3.9.0.vsix
-EXIT /B 0
-:INSTALL_LIVE_SERVER_P
-    CALL code --install-extension vs-extensions/ritwickdey.LiveServer-5.6.1.vsix
+    IF /I "%1"=="-p" (
+        code --install-extension vs-extensions/ritwickdey.LiveServer-5.6.1.vsix > nul
+    ) ELSE (
+        code --install-extension ritwickdey.liveserver > nul
+    )
 EXIT /B 0
 :ECHORED
     ECHO [31;1m%~1[0m
