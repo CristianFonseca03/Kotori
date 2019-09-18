@@ -60,452 +60,374 @@ EXIT /B 0
     ECHO.
 GOTO:EOF
 :COMANDS
+    SET HELP_=
+    SET VER_=
+    SET CHOCO_=
+    SET VSCODE_=
+    SET GIT_=
+    SET TER_=
+    SET UP_=
+    SET C1_=
+    IF /I "%1"=="" SET HELP_=TRUE
+    IF /I "%1"=="-?" SET HELP_=TRUE
+    IF /I "%1"=="-h" SET HELP_=TRUE
+    IF /I "%1"=="--help" SET HELP_=TRUE
+    IF /I "%1"=="-v" SET VER_=TRUE
+    IF /I "%1"=="--version" SET VER_=TRUE
+    IF /I "%1"=="-ch" SET CHOCO_=TRUE
+    IF /I "%1"=="--install-chocolatey" SET CHOCO_=TRUE
+    IF /I "%1"=="-vs" SET VSCODE_=TRUE
+    IF /I "%1"=="--install-code" SET VSCODE_=TRUE
+    IF /I "%1"=="-ter" SET TER_=TRUE
+    IF /I "%1"=="--install-terminus" SET TER_=TRUE
+    IF /I "%1"=="-git" SET GIT_=TRUE
+    IF /I "%1"=="--install-git" SET GIT_=TRUE
+    IF /I "%1"=="-up" SET UP_=TRUE
+    IF /I "%1"=="--unset-proxy" SET UP_=TRUE
+    IF /I "%1"=="-c1" SET C1_=TRUE
+    IF /I "%1"=="--configuration-1" SET C1_=TRUE
+    IF DEFINED HELP_ (
+        ECHO HELP
+    )
+    IF DEFINED VER_ (
+        ECHO VER
+    )
+    IF DEFINED CHOCO_ (
+        ECHO CHOCO
+    )
+    IF DEFINED VSCODE_ (
+        ECHO VSCODE
+    )
+    IF DEFINED GIT_ (
+        ECHO GIT
+    )
+    IF DEFINED TER_ (
+        ECHO TER
+    )
+    IF DEFINED UP_ (
+        ECHO UP
+    )
+    IF DEFINED C1_ (
+        ECHO C1
+    )
     REM TODO: ARREGLAR ERROR
-    IF /I "%1"=="" (
-        CALL:HELP_MESSAGE
-    )
-    IF /I "%1"=="-?" (
-        CALL:HELP_MESSAGE
-    )
-    IF /I "%1"=="--help" (
-        CALL:HELP_MESSAGE
-    )
-    IF /I "%1"=="-v" (
-        CALL:ECHOGREEN "Kotori %VERSION%v"
-    )
-    IF /I "%1"=="--version" (
-        CALL:ECHOGREEN "%VERSION%"
-    )
-    IF /I "%1"=="-ch" (
-        SET INSTALLED =
-        IF EXIST %~d0%~p0\.installed (
-            FOR /F "delims=;" %%A IN (%~d0%~p0\.installed) DO (
-                IF "%%A" == "CHOCOLATEY" SET INSTALLED=TRUE
-            )
-        )
-        IF DEFINED INSTALLED (
-            CALL:ECHOYELLOW "Chocolatey ya se encuentra instalado."
-            ECHO.
-        ) ELSE (
-            CALL:ECHOBLUE "Se instalaran los siguientes programas: "
-            ECHO.
-            CALL:ECHOMAGENTA "Chocolatey."
-            ECHO.
-            GOTO:INSTALL_CHOCO
-        )
-    )
-    IF /I "%1"=="--install-chocolatey" (
-        SET INSTALLED =
-        IF EXIST %~d0%~p0\.installed (
-            FOR /F "delims=;" %%A IN (%~d0%~p0\.installed) DO (
-                IF "%%A" == "CHOCOLATEY" SET INSTALLED=TRUE
-            )
-        )
-        IF DEFINED INSTALLED (
-            CALL:ECHOYELLOW "Chocolatey ya se encuentra instalado."
-            ECHO.
-        ) ELSE (
-            ECHO.
-            CALL:ECHOBLUE "Se instalaran los siguientes programas: "
-            ECHO.
-            CALL:ECHOMAGENTA "Chocolatey."
-            ECHO.
-            GOTO:INSTALL_CHOCO
-        )
-    )
-    IF /I "%1"=="-vs" (
-        SET INSTALLED =
-        IF EXIST %~d0%~p0\.installed (
-            FOR /F "delims=;" %%A IN (%~d0%~p0\.installed) DO (
-                IF "%%A" == "VSCODE" SET INSTALLED=TRUE
-            )
-        )
-        IF DEFINED INSTALLED (
-            CALL:ECHOYELLOW "Visual Studio Code ya se encuentra instalado."
-            ECHO.
-        ) ELSE (
-            ECHO.
-            CALL:ECHOBLUE "Se instalaran los siguientes programas: "
-            ECHO.
-            CALL:ECHOMAGENTA "Visual Studio Code."
-            ECHO.
-            GOTO:INSTALL_CODE
-        )Ñ
-        IF /I "%2"=="-beautify" (
-            IF /I "%3"=="-p" (
-                ECHO.
-                ECHO Se instalaran las siguientes extensiones:
-                ECHO.
-                CALL:ECHOYELLOW "Beautify."
-                ECHO.
-                CALL:INSTALL_BEAUTIFY_P
-            )
-            IF /I "%3"=="" (
-                ECHO.
-                CALL:ECHOYELLOW "ADVERTENCIA: Si se generan errores al instalar la extencion','"
-                CALL:ECHOYELLOW "se recomienda utilizarla bandera -p como tercer parametro."
-                ECHO.
-                ECHO Se instalaran las siguientes extensiones:
-                ECHO.
-                CALL:ECHOYELLOW "Beautify."
-                ECHO.
-                CALL:INSTALL_BEAUTIFY
-            )
-        ) 
-        IF /I "%2"=="-material-theme" (
-            CALL:ECHOYELLOW "Se instalaran las siguientes extensiones:"
-            ECHO.
-            CALL:ECHOMAGENTA "Material Theme"
-            ECHO.
-            CALL:ECHOYELLOW "Instalando Material Theme..."
-            CALL:INSTALL_MATERIAL_THEME %3
-            ECHO.
-            CALL:ECHOYELLOW "ALERTA: Si no se instalan las extensiones, revisa si estas bajo un proxy e intenta con la bandera -p. /? para ver el menu de ayuda"
-        )
-        IF /I "%2"=="-material-icon" (
-            IF /I "%3"=="-p" (
-                ECHO.
-                ECHO Se instalaran las siguientes extensiones:
-                ECHO.
-                CALL:ECHOYELLOW "Material Icon Theme"
-                ECHO.
-                CALL:INSTALL_MATERIAL_ICON_P
-            )
-            IF /I "%3"=="" (
-                ECHO.
-                CALL:ECHOYELLOW "ADVERTENCIA: Si se generan errores al instalar la extencion','"
-                CALL:ECHOYELLOW "se recomienda utilizarla bandera -p como tercer parametro."
-                ECHO.
-                ECHO Se instalaran las siguientes extensiones:
-                ECHO.
-                CALL:ECHOYELLOW "Material Icon Theme"
-                ECHO.
-                CALL:INSTALL_MATERIAL_ICON
-            )
-        )
-        IF /I "%2"=="-live-server" (
-            IF /I "%3"=="-p" (
-                ECHO.
-                ECHO Se instalaran las siguientes extensiones:
-                ECHO.
-                CALL:ECHOYELLOW "Live Server"
-                ECHO.
-                CALL:INSTALL_LIVE_SERVER_P
-            )
-            IF /I "%3"=="" (
-                ECHO.
-                CALL:ECHOYELLOW "ADVERTENCIA: Si se generan errores al instalar la extencion','"
-                CALL:ECHOYELLOW "se recomienda utilizarla bandera -p como tercer parametro."
-                ECHO.
-                ECHO Se instalaran las siguientes extensiones:
-                ECHO.
-                CALL:ECHOYELLOW "Live Server"
-                ECHO.
-                CALL:INSTALL_LIVE_SERVER
-            )
-        )
-    )
-    IF /I "%1"=="--install-code" (
-        SET INSTALLED =
-        IF EXIST %~d0%~p0\.installed (
-            FOR /F "delims=;" %%A IN (%~d0%~p0\.installed) DO (
-                IF "%%A" == "VSCODE" SET INSTALLED=TRUE
-            )
-        )
-        IF DEFINED INSTALLED (
-            CALL:ECHOYELLOW "Visual Studio Code ya se encuentra instalado."
-            ECHO.
-        ) ELSE (
-            ECHO.
-            CALL:ECHOBLUE "Se instalaran los siguientes programas: "
-            ECHO.
-            CALL:ECHOMAGENTA "Visual Studio Code."
-            ECHO.
-            GOTO:INSTALL_CODE
-        )
-        IF /I "%2"=="-beautify" (
-            IF /I "%3"=="-p" (
-                ECHO.
-                ECHO Se instalaran las siguientes extensiones:
-                ECHO.
-                CALL:ECHOYELLOW "Beautify."
-                ECHO.
-                CALL:INSTALL_BEAUTIFY_P
-            )
-            IF /I "%3"=="" (
-                ECHO.
-                CALL:ECHOYELLOW "ADVERTENCIA: Si se generan errores al instalar la extencion','"
-                CALL:ECHOYELLOW "se recomienda utilizarla bandera -p como tercer parametro."
-                ECHO.
-                ECHO Se instalaran las siguientes extensiones:
-                ECHO.
-                CALL:ECHOYELLOW "Beautify."
-                ECHO.
-                CALL:INSTALL_BEAUTIFY
-            )
-        )
-        IF /I "%2"=="-material-theme" (
-            IF /I "%3"=="-p" (
-                ECHO.
-                ECHO Se instalaran las siguientes extensiones:
-                ECHO.
-                CALL:ECHOYELLOW "Material Theme"
-                ECHO.
-                CALL:INSTALL_MATERIAL_THEME_P
-            )
-            IF /I "%3"=="" (
-                ECHO.
-                CALL:ECHOYELLOW "ADVERTENCIA: Si se generan errores al instalar la extencion','"
-                CALL:ECHOYELLOW "se recomienda utilizarla bandera -p como tercer parametro."
-                ECHO.
-                ECHO Se instalaran las siguientes extensiones:
-                ECHO.
-                CALL:ECHOYELLOW "Material Theme"
-                ECHO.
-                CALL:INSTALL_MATERIAL_THEME
-            )
-        )
-        IF /I "%2"=="-material-icon" (
-            IF /I "%3"=="-p" (
-                ECHO.
-                ECHO Se instalaran las siguientes extensiones:
-                ECHO.
-                CALL:ECHOYELLOW "Material Icon Theme"
-                ECHO.
-                CALL:INSTALL_MATERIAL_ICON_P
-            )
-            IF /I "%3"=="" (
-                ECHO.
-                CALL:ECHOYELLOW "ADVERTENCIA: Si se generan errores al instalar la extencion','"
-                CALL:ECHOYELLOW "se recomienda utilizarla bandera -p como tercer parametro."
-                ECHO.
-                ECHO Se instalaran las siguientes extensiones:
-                ECHO.
-                CALL:ECHOYELLOW "Material Icon Theme"
-                ECHO.
-                CALL:INSTALL_MATERIAL_ICON
-            )
-        )
-        IF /I "%2"=="-live-server" (
-            IF /I "%3"=="-p" (
-                ECHO.
-                ECHO Se instalaran las siguientes extensiones:
-                ECHO.
-                CALL:ECHOYELLOW "Live Server"
-                ECHO.
-                CALL:INSTALL_LIVE_SERVER_P
-            )
-            IF /I "%3"=="" (
-                ECHO.
-                CALL:ECHOYELLOW "ADVERTENCIA: Si se generan errores al instalar la extencion','"
-                CALL:ECHOYELLOW "se recomienda utilizarla bandera -p como tercer parametro."
-                ECHO.
-                ECHO Se instalaran las siguientes extensiones:
-                ECHO.
-                CALL:ECHOYELLOW "Live Server"
-                ECHO.
-                CALL:INSTALL_LIVE_SERVER
-            )
-        ) 
-    )
-    IF /I "%1"=="-git" (
-        SET INSTALLED = 
-        IF EXIST %~d0%~p0\.installed (
-            FOR /F "delims=;" %%A IN (%~d0%~p0\.installed) DO (
-                IF "%%A" == "GIT" SET INSTALLED=TRUE
-            )
-        )
-        IF DEFINED INSTALLED (
-            CALL:ECHOYELLOW "Git ya se encuentra instalado."
-            ECHO.
-        ) ELSE (
-            ECHO.
-            CALL:ECHOBLUE "Se instalaran los siguientes programas: "
-            ECHO.
-            CALL:ECHOMAGENTA "Git."
-            ECHO.
-            GOTO:INSTALL_GIT
-        )
-        IF /I "%2"=="--configure-proxy" (
-            CALL:PROXY_GIT
-        )
-        IF /I "%2"=="-p" (
-            CALL:PROXY_GIT
-        )
-        IF /I "%2"=="--set-credentials" (
-            CALL:GIT_CREDENTIALS
-        )
-        IF /I "%2"=="-c" (
-            CALL:GIT_CREDENTIALS
-        )
-    )
-    IF /I "%1"=="--install-git" (
-        SET INSTALLED =
-        IF EXIST %~d0%~p0\.installed (
-            FOR /F "delims=;" %%A IN (%~d0%~p0\.installed) DO (
-                IF "%%A" == "GIT" SET INSTALLED=TRUE
-            )
-        )
-        IF DEFINED INSTALLED (
-            CALL:ECHOYELLOW "Git ya se encuentra instalado."
-            ECHO.
-        ) ELSE (
-            ECHO.
-            CALL:ECHOBLUE "Se instalaran los siguientes programas: "
-            ECHO.
-            CALL:ECHOMAGENTA "Git."
-            ECHO.
-            GOTO:INSTALL_GIT
-        )
-        IF /I "%2"=="--configure-proxy" (
-            CALL:PROXY_GIT
-        )
-        IF /I "%2"=="--set-credentials" (
-            CALL:GIT_CREDENTIALS
-        )
-    )
-    IF /I "%1"=="-up" (
-        IF EXIST "C:\Program Files\Git\cmd" (
-            CALL:UNSET_GIT_PROXY
-        ) ELSE (
-            ECHO.
-            CALL:ECHORED "Git no esta instalado en el equipo"
-            EXIT /B 0
-        )
-    )
-    IF /I "%1"=="--unset-proxy" (
-        IF EXIST "C:\Program Files\Git\cmd" (
-            CALL:UNSET_GIT_PROXY
-        ) ELSE (
-            ECHO.
-            CALL:ECHORED "Git no esta instalado en el equipo"
-            EXIT /B 0
-        )
-    )
-    IF /I "%1"=="-ter" (
-        SET INSTALLED =
-        IF EXIST %~d0%~p0\.installed (
-            FOR /F "delims=;" %%A IN (%~d0%~p0\.installed) DO (
-                IF "%%A" == "TERMINUS" SET INSTALLED=TRUE
-            )
-        )
-        IF DEFINED INSTALLED (
-            CALL:ECHOYELLOW "Terminus ya se encuentra instalado."
-            ECHO.
-        ) ELSE (
-            ECHO.
-            CALL:ECHOBLUE "Se instalaran los siguientes programas: "
-            ECHO.
-            CALL:ECHOMAGENTA "Terminus."
-            ECHO.
-            GOTO:INSTALL_TERMINUS
-        )
-    )
-    IF /I "%1"=="--install-terminus" (
-        SET INSTALLED =
-        IF EXIST %~d0%~p0\.installed (
-            FOR /F "delims=;" %%A IN (%~d0%~p0\.installed) DO (
-                IF "%%A" == "TERMINUS" SET INSTALLED=TRUE
-            )
-        )
-        IF DEFINED INSTALLED (
-            CALL:ECHOYELLOW "Terminus ya se encuentra instalado."
-            ECHO.
-        ) ELSE (
-            ECHO.
-            CALL:ECHOBLUE "Se instalaran los siguientes programas: "
-            ECHO.
-            CALL:ECHOMAGENTA "Terminus."
-            ECHO.
-            GOTO:INSTALL_TERMINUS
-        )
-    )
-    IF /I "%1"=="-c1" (
-        ECHO.
-        CALL:ECHOBLUE "Se instalaran los siguientes programas: "
-        ECHO.
-        CALL:ECHOYELLOW "Chocolatey."
-        CALL:ECHOYELLOW "Visual Studio Code."
-        CALL:ECHOYELLOW "Git."
-        CALL:INSTALL_CHOCO
-        CALL:INSTALL_CODE
-        CALL:INSTALL_GIT
-        CALL:GIT_CREDENTIALS
-        ECHO.
-        ECHO Se instalaran las siguientes extensiones:
-        ECHO.
-        CALL:ECHOYELLOW "Beautify"
-        CALL:ECHOYELLOW "Material Theme"
-        CALL:ECHOYELLOW "Material Icon Theme"
-        CALL:ECHOYELLOW "Live Server"
-        ECHO.
-        IF /I "%2"=="-p" (
-            CALL:INSTALL_BEAUTIFY_P
-            ECHO.
-            CALL:INSTALL_MATERIAL_THEME_P
-            ECHO.
-            CALL:INSTALL_MATERIAL_ICON_P
-            ECHO.
-            CALL:INSTALL_LIVE_SERVER_P
-            CALL:PROXY_GIT
-        )
-        IF /I "%2"=="" (
-            CALL:ECHOYELLOW "ADVERTENCIA: Si se generan errores al instalar las extenciones','"
-            CALL:ECHOYELLOW "se recomienda utilizarla bandera -p como segundo parametro."
-            ECHO.
-            CALL:INSTALL_BEAUTIFY
-            ECHO.
-            CALL:INSTALL_MATERIAL_THEME
-            ECHO.
-            CALL:INSTALL_MATERIAL_ICON
-            ECHO.
-            CALL:INSTALL_LIVE_SERVER
-            ECHO.
-        )
-    )
-    IF /I "%1"=="--configuration-1" (
-        ECHO.
-        CALL:ECHOBLUE "Se instalaran los siguientes programas: "
-        ECHO.
-        CALL:ECHOYELLOW "Chocolatey."
-        CALL:ECHOYELLOW "Visual Studio Code."
-        CALL:ECHOYELLOW "Git."
-        CALL:INSTALL_CHOCO
-        CALL:INSTALL_CODE
-        CALL:INSTALL_GIT
-        CALL:GIT_CREDENTIALS
-        ECHO.
-        ECHO Se instalaran las siguientes extensiones:
-        ECHO.
-        CALL:ECHOYELLOW "Beautify"
-        CALL:ECHOYELLOW "Material Theme"
-        CALL:ECHOYELLOW "Material Icon Theme"
-        CALL:ECHOYELLOW "Live Server"
-        ECHO.
-        IF /I "%2"=="-p" (
-            CALL:INSTALL_BEAUTIFY_P
-            ECHO.
-            CALL:INSTALL_MATERIAL_THEME_P
-            ECHO.
-            CALL:INSTALL_MATERIAL_ICON_P
-            ECHO.
-            CALL:INSTALL_LIVE_SERVER_P
-            CALL:PROXY_GIT
-        )
-        IF /I "%2"=="" (
-            CALL:ECHOYELLOW "ADVERTENCIA: Si se generan errores al instalar las extenciones','"
-            CALL:ECHOYELLOW "se recomienda utilizarla bandera -p como segundo parametro."
-            ECHO.
-            CALL:INSTALL_BEAUTIFY
-            ECHO.
-            CALL:INSTALL_MATERIAL_THEME
-            ECHO.
-            CALL:INSTALL_MATERIAL_ICON
-            ECHO.
-            CALL:INSTALL_LIVE_SERVER
-            ECHO.
-        )
-    )
+    REM IF /I "%1"=="-?" (
+    REM     CALL:HELP_MESSAGE
+    REM )
+    REM IF /I "%1"=="-v" (
+    REM     CALL:ECHOGREEN "Kotori %VERSION%v"
+    REM )
+    REM IF /I "%1"=="--version" (
+    REM     CALL:ECHOGREEN "%VERSION%"
+    REM )
+    REM IF /I "%1"=="-ch" (
+    REM     SET INSTALLED =
+    REM     IF EXIST %~d0%~p0\.installed (
+    REM         FOR /F "delims=;" %%A IN (%~d0%~p0\.installed) DO (
+    REM             IF "%%A" == "CHOCOLATEY" SET INSTALLED=TRUE
+    REM         )
+    REM     )
+    REM     IF DEFINED INSTALLED (
+    REM         CALL:ECHOYELLOW "Chocolatey ya se encuentra instalado."
+    REM         ECHO.
+    REM     ) ELSE (
+    REM         CALL:ECHOBLUE "Se instalaran los siguientes programas: "
+    REM         ECHO.
+    REM         CALL:ECHOMAGENTA "Chocolatey."
+    REM         ECHO.
+    REM         GOTO:INSTALL_CHOCO
+    REM     )
+    REM )
+    REM IF /I "%1"=="-vs" (
+    REM     SET INSTALLED =
+    REM     IF EXIST %~d0%~p0\.installed (
+    REM         FOR /F "delims=;" %%A IN (%~d0%~p0\.installed) DO (
+    REM             IF "%%A" == "VSCODE" SET INSTALLED=TRUE
+    REM         )
+    REM     )
+    REM     IF DEFINED INSTALLED (
+    REM         CALL:ECHOYELLOW "Visual Studio Code ya se encuentra instalado."
+    REM         ECHO.
+    REM     ) ELSE (
+    REM         ECHO.
+    REM         CALL:ECHOBLUE "Se instalaran los siguientes programas: "
+    REM         ECHO.
+    REM         CALL:ECHOMAGENTA "Visual Studio Code."
+    REM         ECHO.
+    REM         GOTO:INSTALL_CODE
+    REM     )Ñ
+    REM     IF /I "%2"=="-beautify" (
+    REM         IF /I "%3"=="-p" (
+    REM             ECHO.
+    REM             ECHO Se instalaran las siguientes extensiones:
+    REM             ECHO.
+    REM             CALL:ECHOYELLOW "Beautify."
+    REM             ECHO.
+    REM             CALL:INSTALL_BEAUTIFY_P
+    REM         )
+    REM         IF /I "%3"=="" (
+    REM             ECHO.
+    REM             CALL:ECHOYELLOW "ADVERTENCIA: Si se generan errores al instalar la extencion','"
+    REM             CALL:ECHOYELLOW "se recomienda utilizarla bandera -p como tercer parametro."
+    REM             ECHO.
+    REM             ECHO Se instalaran las siguientes extensiones:
+    REM             ECHO.
+    REM             CALL:ECHOYELLOW "Beautify."
+    REM             ECHO.
+    REM             CALL:INSTALL_BEAUTIFY
+    REM         )
+    REM     ) 
+    REM     IF /I "%2"=="-material-theme" (
+    REM         CALL:ECHOYELLOW "Se instalaran las siguientes extensiones:"
+    REM         ECHO.
+    REM         CALL:ECHOMAGENTA "Material Theme"
+    REM         ECHO.
+    REM         CALL:ECHOYELLOW "Instalando Material Theme..."
+    REM         CALL:INSTALL_MATERIAL_THEME %3
+    REM         ECHO.
+    REM         CALL:ECHOYELLOW "ALERTA: Si no se instalan las extensiones, revisa si estas bajo un proxy e intenta con la bandera -p. /? para ver el menu de ayuda"
+    REM     )
+    REM     IF /I "%2"=="-material-icon" (
+    REM         IF /I "%3"=="-p" (
+    REM             ECHO.
+    REM             ECHO Se instalaran las siguientes extensiones:
+    REM             ECHO.
+    REM             CALL:ECHOYELLOW "Material Icon Theme"
+    REM             ECHO.
+    REM             CALL:INSTALL_MATERIAL_ICON_P
+    REM         )
+    REM         IF /I "%3"=="" (
+    REM             ECHO.
+    REM             CALL:ECHOYELLOW "ADVERTENCIA: Si se generan errores al instalar la extencion','"
+    REM             CALL:ECHOYELLOW "se recomienda utilizarla bandera -p como tercer parametro."
+    REM             ECHO.
+    REM             ECHO Se instalaran las siguientes extensiones:
+    REM             ECHO.
+    REM             CALL:ECHOYELLOW "Material Icon Theme"
+    REM             ECHO.
+    REM             CALL:INSTALL_MATERIAL_ICON
+    REM         )
+    REM     )
+    REM     IF /I "%2"=="-live-server" (
+    REM         IF /I "%3"=="-p" (
+    REM             ECHO.
+    REM             ECHO Se instalaran las siguientes extensiones:
+    REM             ECHO.
+    REM             CALL:ECHOYELLOW "Live Server"
+    REM             ECHO.
+    REM             CALL:INSTALL_LIVE_SERVER_P
+    REM         )
+    REM         IF /I "%3"=="" (
+    REM             ECHO.
+    REM             CALL:ECHOYELLOW "ADVERTENCIA: Si se generan errores al instalar la extencion','"
+    REM             CALL:ECHOYELLOW "se recomienda utilizarla bandera -p como tercer parametro."
+    REM             ECHO.
+    REM             ECHO Se instalaran las siguientes extensiones:
+    REM             ECHO.
+    REM             CALL:ECHOYELLOW "Live Server"
+    REM             ECHO.
+    REM             CALL:INSTALL_LIVE_SERVER
+    REM         )
+    REM     )
+    REM )
+    REM IF /I "%1"=="-git" (
+    REM     SET INSTALLED = 
+    REM     IF EXIST %~d0%~p0\.installed (
+    REM         FOR /F "delims=;" %%A IN (%~d0%~p0\.installed) DO (
+    REM             IF "%%A" == "GIT" SET INSTALLED=TRUE
+    REM         )
+    REM     )
+    REM     IF DEFINED INSTALLED (
+    REM         CALL:ECHOYELLOW "Git ya se encuentra instalado."
+    REM         ECHO.
+    REM     ) ELSE (
+    REM         ECHO.
+    REM         CALL:ECHOBLUE "Se instalaran los siguientes programas: "
+    REM         ECHO.
+    REM         CALL:ECHOMAGENTA "Git."
+    REM         ECHO.
+    REM         GOTO:INSTALL_GIT
+    REM     )
+    REM     IF /I "%2"=="--configure-proxy" (
+    REM         CALL:PROXY_GIT
+    REM     )
+    REM     IF /I "%2"=="-p" (
+    REM         CALL:PROXY_GIT
+    REM     )
+    REM     IF /I "%2"=="--set-credentials" (
+    REM         CALL:GIT_CREDENTIALS
+    REM     )
+    REM     IF /I "%2"=="-c" (
+    REM         CALL:GIT_CREDENTIALS
+    REM     )
+    REM )
+    REM IF /I "%1"=="--install-git" (
+    REM     SET INSTALLED =
+    REM     IF EXIST %~d0%~p0\.installed (
+    REM         FOR /F "delims=;" %%A IN (%~d0%~p0\.installed) DO (
+    REM             IF "%%A" == "GIT" SET INSTALLED=TRUE
+    REM         )
+    REM     )
+    REM     IF DEFINED INSTALLED (
+    REM         CALL:ECHOYELLOW "Git ya se encuentra instalado."
+    REM         ECHO.
+    REM     ) ELSE (
+    REM         ECHO.
+    REM         CALL:ECHOBLUE "Se instalaran los siguientes programas: "
+    REM         ECHO.
+    REM         CALL:ECHOMAGENTA "Git."
+    REM         ECHO.
+    REM         GOTO:INSTALL_GIT
+    REM     )
+    REM     IF /I "%2"=="--configure-proxy" (
+    REM         CALL:PROXY_GIT
+    REM     )
+    REM     IF /I "%2"=="--set-credentials" (
+    REM         CALL:GIT_CREDENTIALS
+    REM     )
+    REM )
+    REM IF /I "%1"=="-up" (
+    REM     IF EXIST "C:\Program Files\Git\cmd" (
+    REM         CALL:UNSET_GIT_PROXY
+    REM     ) ELSE (
+    REM         ECHO.
+    REM         CALL:ECHORED "Git no esta instalado en el equipo"
+    REM         EXIT /B 0
+    REM     )
+    REM )
+    REM IF /I "%1"=="--unset-proxy" (
+    REM     IF EXIST "C:\Program Files\Git\cmd" (
+    REM         CALL:UNSET_GIT_PROXY
+    REM     ) ELSE (
+    REM         ECHO.
+    REM         CALL:ECHORED "Git no esta instalado en el equipo"
+    REM         EXIT /B 0
+    REM     )
+    REM )
+    REM IF /I "%1"=="-ter" (
+    REM     SET INSTALLED =
+    REM     IF EXIST %~d0%~p0\.installed (
+    REM         FOR /F "delims=;" %%A IN (%~d0%~p0\.installed) DO (
+    REM             IF "%%A" == "TERMINUS" SET INSTALLED=TRUE
+    REM         )
+    REM     )
+    REM     IF DEFINED INSTALLED (
+    REM         CALL:ECHOYELLOW "Terminus ya se encuentra instalado."
+    REM         ECHO.
+    REM     ) ELSE (
+    REM         ECHO.
+    REM         CALL:ECHOBLUE "Se instalaran los siguientes programas: "
+    REM         ECHO.
+    REM         CALL:ECHOMAGENTA "Terminus."
+    REM         ECHO.
+    REM         GOTO:INSTALL_TERMINUS
+    REM     )
+    REM )
+    REM IF /I "%1"=="--install-terminus" (
+    REM     SET INSTALLED =
+    REM     IF EXIST %~d0%~p0\.installed (
+    REM         FOR /F "delims=;" %%A IN (%~d0%~p0\.installed) DO (
+    REM             IF "%%A" == "TERMINUS" SET INSTALLED=TRUE
+    REM         )
+    REM     )
+    REM     IF DEFINED INSTALLED (
+    REM         CALL:ECHOYELLOW "Terminus ya se encuentra instalado."
+    REM         ECHO.
+    REM     ) ELSE (
+    REM         ECHO.
+    REM         CALL:ECHOBLUE "Se instalaran los siguientes programas: "
+    REM         ECHO.
+    REM         CALL:ECHOMAGENTA "Terminus."
+    REM         ECHO.
+    REM         GOTO:INSTALL_TERMINUS
+    REM     )
+    REM )
+    REM IF /I "%1"=="-c1" (
+    REM     ECHO.
+    REM     CALL:ECHOBLUE "Se instalaran los siguientes programas: "
+    REM     ECHO.
+    REM     CALL:ECHOYELLOW "Chocolatey."
+    REM     CALL:ECHOYELLOW "Visual Studio Code."
+    REM     CALL:ECHOYELLOW "Git."
+    REM     CALL:INSTALL_CHOCO
+    REM     CALL:INSTALL_CODE
+    REM     CALL:INSTALL_GIT
+    REM     CALL:GIT_CREDENTIALS
+    REM     ECHO.
+    REM     ECHO Se instalaran las siguientes extensiones:
+    REM     ECHO.
+    REM     CALL:ECHOYELLOW "Beautify"
+    REM     CALL:ECHOYELLOW "Material Theme"
+    REM     CALL:ECHOYELLOW "Material Icon Theme"
+    REM     CALL:ECHOYELLOW "Live Server"
+    REM     ECHO.
+    REM     IF /I "%2"=="-p" (
+    REM         CALL:INSTALL_BEAUTIFY_P
+    REM         ECHO.
+    REM         CALL:INSTALL_MATERIAL_THEME_P
+    REM         ECHO.
+    REM         CALL:INSTALL_MATERIAL_ICON_P
+    REM         ECHO.
+    REM         CALL:INSTALL_LIVE_SERVER_P
+    REM         CALL:PROXY_GIT
+    REM     )
+    REM     IF /I "%2"=="" (
+    REM         CALL:ECHOYELLOW "ADVERTENCIA: Si se generan errores al instalar las extenciones','"
+    REM         CALL:ECHOYELLOW "se recomienda utilizarla bandera -p como segundo parametro."
+    REM         ECHO.
+    REM         CALL:INSTALL_BEAUTIFY
+    REM         ECHO.
+    REM         CALL:INSTALL_MATERIAL_THEME
+    REM         ECHO.
+    REM         CALL:INSTALL_MATERIAL_ICON
+    REM         ECHO.
+    REM         CALL:INSTALL_LIVE_SERVER
+    REM         ECHO.
+    REM     )
+    REM )
+    REM IF /I "%1"=="--configuration-1" (
+    REM     ECHO.
+    REM     CALL:ECHOBLUE "Se instalaran los siguientes programas: "
+    REM     ECHO.
+    REM     CALL:ECHOYELLOW "Chocolatey."
+    REM     CALL:ECHOYELLOW "Visual Studio Code."
+    REM     CALL:ECHOYELLOW "Git."
+    REM     CALL:INSTALL_CHOCO
+    REM     CALL:INSTALL_CODE
+    REM     CALL:INSTALL_GIT
+    REM     CALL:GIT_CREDENTIALS
+    REM     ECHO.
+    REM     ECHO Se instalaran las siguientes extensiones:
+    REM     ECHO.
+    REM     CALL:ECHOYELLOW "Beautify"
+    REM     CALL:ECHOYELLOW "Material Theme"
+    REM     CALL:ECHOYELLOW "Material Icon Theme"
+    REM     CALL:ECHOYELLOW "Live Server"
+    REM     ECHO.
+    REM     IF /I "%2"=="-p" (
+    REM         CALL:INSTALL_BEAUTIFY_P
+    REM         ECHO.
+    REM         CALL:INSTALL_MATERIAL_THEME_P
+    REM         ECHO.
+    REM         CALL:INSTALL_MATERIAL_ICON_P
+    REM         ECHO.
+    REM         CALL:INSTALL_LIVE_SERVER_P
+    REM         CALL:PROXY_GIT
+    REM     )
+    REM     IF /I "%2"=="" (
+    REM         CALL:ECHOYELLOW "ADVERTENCIA: Si se generan errores al instalar las extenciones','"
+    REM         CALL:ECHOYELLOW "se recomienda utilizarla bandera -p como segundo parametro."
+    REM         ECHO.
+    REM         CALL:INSTALL_BEAUTIFY
+    REM         ECHO.
+    REM         CALL:INSTALL_MATERIAL_THEME
+    REM         ECHO.
+    REM         CALL:INSTALL_MATERIAL_ICON
+    REM         ECHO.
+    REM         CALL:INSTALL_LIVE_SERVER
+    REM         ECHO.
+    REM     )
+    REM )
 EXIT /B 0
 :HELP_MESSAGE
     ECHO -?, --help
