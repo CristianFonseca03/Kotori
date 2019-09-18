@@ -4,7 +4,7 @@ SET VERSION=0.12.1
 NET SESSION >nul 2>&1
 IF %ERRORLEVEL% == 0 (
     IF NOT EXIST %~d0%~p0.installed (
-        REM TODO: crear archivo .installed
+        FSUTIL FILE CREATENEW .installed 1 > NUL
     )
     SET VER_=
     IF /I "%1"=="-v" SET VER_=TRUE
@@ -60,6 +60,7 @@ EXIT /B 0
     ECHO.
 GOTO:EOF
 :COMANDS
+    REM TODO: ARREGLAR ERROR
     IF /I "%1"=="" (
         CALL:HELP_MESSAGE
     )
